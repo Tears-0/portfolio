@@ -1,0 +1,39 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { SceneDef } from '../../scenes/registry';
+import { hasPlaceholder } from '../../lib/placeholder';
+import Beat from '../Beat.astro';
+import SceneLayer from '../SceneLayer.astro';
+import TimeMachine from '../TimeMachine.astro';
+
+interface Props {
+  scene: SceneDef;
+  profile: CollectionEntry<'profile'>['data'];
+}
+const { scene, profile } = Astro.props;
+---
+
+<SceneLayer scene={scene} anchor="top">
+  <Beat scene="act-2099" beat="prologue">
+    <TimeMachine />
+  </Beat>
+  <Beat scene="act-2099" beat="greeting" id="greeting">
+    <p class="greeting">{profile.greeting}</p>
+    <h1 class="name" id="top-title" tabindex="-1">
+      {profile.displayName}
+    </h1>
+    <p class="headline">{profile.headline}</p>
+  </Beat>
+  <Beat scene="act-2099" beat="identity">
+    <ul class="cards">
+      {profile.cards.map((card) => (
+        <li class="card">
+          <span class="card-label">{card.label}</span>
+          <span class:list={['card-value', { draft: hasPlaceholder(card.value) }]}>
+            {card.value}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </Beat>
+</SceneLayer>

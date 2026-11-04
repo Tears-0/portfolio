@@ -1,0 +1,73 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { SceneDef } from '../../scenes/registry';
+import { hasPlaceholder } from '../../lib/placeholder';
+import Beat from '../Beat.astro';
+import SceneLayer from '../SceneLayer.astro';
+
+interface Props {
+  scene: SceneDef;
+  philosophy: CollectionEntry<'philosophy'>['data'];
+  profile: CollectionEntry<'profile'>['data'];
+}
+const { scene, philosophy, profile } = Astro.props;
+// Shown as text until M2 builds the mailto link with JavaScript (privacy section of the spec).
+const email = profile.links.email?.replace('@', ' [at] ');
+---
+
+<SceneLayer scene={scene} anchor="origin" heading="1350 · Origin">
+  <Beat scene="act-1350" beat="philosophy">
+    <div class="leaf">
+      <blockquote class="closing-line">
+        <p>{philosophy.closingLine}</p>
+      </blockquote>
+      <p class:list={{ draft: hasPlaceholder(philosophy.body) }}>{philosophy.body}</p>
+      <h3>Origin</h3>
+      <p class:list={{ draft: hasPlaceholder(philosophy.origin) }}>{philosophy.origin}</p>
+    </div>
+  </Beat>
+  <Beat scene="act-1350" beat="contact" id="contact">
+    <div class="portal">
+      <h3 id="contact-title" tabindex="-1">
+        Contact
+      </h3>
+      <form class="portal-form" method="post" action="/api/contact">
+        <label>
+          Name <input name="name" autocomplete="name" required />
+        </label>
+        <label>
+          Email <input name="email" type="email" autocomplete="email" required />
+        </label>
+        <label>
+          Message <textarea name="message" rows="4" required></textarea>
+        </label>
+        <button type="submit" disabled>
+          Seal the message
+        </button>
+        <p class="gb-note" aria-hidden="true">
+          The form posts to a Worker with Turnstile in M5; sending is off until then
+        </p>
+      </form>
+      <ul class="outer-ring" aria-label="Other ways to reach me">
+        {email && <li>{email}</li>}
+        {profile.links.linkedin ? (
+          <li>
+            <a href={profile.links.linkedin}>LinkedIn</a>
+          </li>
+        ) : (
+          <li class="draft">LinkedIn [add]</li>
+        )}
+        {profile.links.github ? (
+          <li>
+            <a href={profile.links.github}>GitHub</a>
+          </li>
+        ) : (
+          <li class="draft">GitHub [add]</li>
+        )}
+        <li>
+          <a href="/resume">Unfurl the resume</a>
+        </li>
+      </ul>
+    </div>
+  </Beat>
+</SceneLayer>

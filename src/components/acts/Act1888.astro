@@ -1,0 +1,58 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { SceneDef } from '../../scenes/registry';
+import Beat from '../Beat.astro';
+import SceneLayer from '../SceneLayer.astro';
+
+interface Props {
+  scene: SceneDef;
+  /** Skill categories in order: one valve and one rest point each. */
+  skills: CollectionEntry<'skills'>[];
+}
+const { scene, skills } = Astro.props;
+---
+
+<SceneLayer scene={scene} anchor="engine" heading="1888 · The Engine">
+  <Beat scene="act-1888" beat="overview">
+    <div class="panel">
+      <h3>Control panel</h3>
+      <ul class="valves">
+        {skills.map((skill) => (
+          <li>{skill.data.name}</li>
+        ))}
+      </ul>
+      <p class="gb-note" aria-hidden="true">
+        Valves, involute gear trains and tier gauges arrive in M4
+      </p>
+    </div>
+  </Beat>
+  {skills.slice(0, 4).map((skill, i) => (
+    <Beat scene="act-1888" beat={`valve-${i + 1}`}>
+      <section class="panel valve" aria-labelledby={`skill-${skill.id}`}>
+        <h3 id={`skill-${skill.id}`}>{skill.data.name}</h3>
+        <ul class="tools">
+          {skill.data.tools.map((tool) => (
+            <li>
+              <span>{tool.name}</span>
+              <span class="tier" data-tier={tool.tier}>
+                {tool.tier}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </Beat>
+  ))}
+  <Beat scene="act-1888" beat="plate">
+    <div class="panel">
+      <h3>Architecture plate</h3>
+      <p>
+        One engraved schematic of a system you built, with pipes standing in for data flow. Draft
+        choice: the quantization benchmark harness.
+      </p>
+      <p class="gb-note" aria-hidden="true">
+        Grey box until M4
+      </p>
+    </div>
+  </Beat>
+</SceneLayer>

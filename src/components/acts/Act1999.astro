@@ -1,0 +1,92 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { SceneDef } from '../../scenes/registry';
+import { hasPlaceholder } from '../../lib/placeholder';
+import Beat from '../Beat.astro';
+import SceneLayer from '../SceneLayer.astro';
+
+interface Props {
+  scene: SceneDef;
+  /** Featured projects in order; the scroll map has one rest point for each of the first four. */
+  projects: CollectionEntry<'projects'>[];
+}
+const { scene, projects } = Astro.props;
+
+const STATUS: Record<CollectionEntry<'projects'>['data']['status'], string> = {
+  completed: 'Completed',
+  'in-progress': 'In progress',
+  'under-review': 'Under review',
+  archived: 'Archived',
+};
+const COMMANDS = ['ls projects', 'run cartridge_02.exe', 'stats quantization', 'help'];
+---
+
+<SceneLayer scene={scene} anchor="works" heading="1999 · Works">
+  {projects.slice(0, 4).map((project, i) => {
+    const { data } = project;
+    return (
+      <Beat scene="act-1999" beat={`project-${i + 1}`}>
+        <article class="window" aria-labelledby={`project-${project.id}`}>
+          <p class="window-bar" aria-hidden="true">
+            cartridge_0{i + 1}.exe · {data.cartridge}
+          </p>
+          <h3 id={`project-${project.id}`}>{data.title}</h3>
+          <p class="summary">{data.summary}</p>
+          <dl class="meta">
+            <div>
+              <dt>Role</dt>
+              <dd class:list={{ draft: hasPlaceholder(data.role) }}>{data.role}</dd>
+            </div>
+            <div>
+              <dt>Period</dt>
+              <dd class:list={{ draft: hasPlaceholder(data.period.start) }}>
+                {data.period.start} – {data.period.end ?? 'now'}
+              </dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>{STATUS[data.status]}</dd>
+            </div>
+          </dl>
+          <ul class="tags" aria-label="Tags">
+            {data.tags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+          {data.highlight && (
+            <p class="highlight">
+              <strong class:list={{ draft: hasPlaceholder(data.highlight.value) }}>
+                {data.highlight.value}
+              </strong>
+              <span>{data.highlight.label}</span>
+              <span class:list={['source', { draft: hasPlaceholder(data.highlight.source) }]}>
+                Source: {data.highlight.source}
+              </span>
+            </p>
+          )}
+          <p class="window-actions">
+            <span class="gb-button">Open case study · M3</span>
+            {data.links.repo && <a href={data.links.repo}>Code</a>}
+            {data.links.paper && <a href={data.links.paper}>Paper</a>}
+          </p>
+        </article>
+      </Beat>
+    );
+  })}
+  <Beat scene="act-1999" beat="console">
+    <div class="panel console">
+      <h3>Console</h3>
+      <p>Free typing plus suggested commands, with answers generated from the content data.</p>
+      <ul class="chips" aria-label="Suggested commands">
+        {COMMANDS.map((command) => (
+          <li>
+            <code>{command}</code>
+          </li>
+        ))}
+      </ul>
+      <p class="gb-note" aria-hidden="true">
+        Grey box until M3
+      </p>
+    </div>
+  </Beat>
+</SceneLayer>

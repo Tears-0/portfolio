@@ -1,0 +1,39 @@
+{
+  "name": "four-eras-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ccy's portfolio: one long scroll that descends from 2099 to 1350 through four retro-futures.",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint . && stylelint \"src/**/*.css\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "verify": "npm run check && npm run lint && npm run format:check && npm test && npm run build"
+  },
+  "dependencies": {
+    "astro": "^7.4.5",
+    "gsap": "^3.15.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "eslint-plugin-astro": "^3.2.1",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.2",
+    "stylelint": "^18.0.0",
+    "stylelint-config-standard": "^41.0.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.1.0"
+  }
+}

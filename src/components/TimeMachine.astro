@@ -1,0 +1,40 @@
+---
+// The prologue's light. Press and hold to charge (1.5 s per era); release to travel.
+---
+
+<div class="tm" data-time-machine data-state="idle">
+  <p class="tm-readout" aria-live="polite">
+    <span class="tm-year" data-tm-year></span>
+    <span class="tm-title" data-tm-title></span>
+  </p>
+  <button class="tm-light" type="button" data-tm-light aria-describedby="tm-hint">
+    <svg class="tm-ring" viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="tm-wavy" cx="60" cy="60" r="36"></circle>
+      <circle class="tm-track" cx="60" cy="60" r="46" pathLength="3"></circle>
+      {[0, 1, 2].map((i) => (
+        <circle
+          class="tm-segment"
+          data-tm-segment
+          cx="60"
+          cy="60"
+          r="46"
+          pathLength="3"
+          style={`--i:${i}`}
+        />
+      ))}
+    </svg>
+    <span class="tm-core" aria-hidden="true"></span>
+    <span class="visually-hidden">
+      Time machine: press and hold to travel back, 1.5 seconds per era
+    </span>
+  </button>
+  <p class="tm-hint" id="tm-hint">
+    Hold to travel
+    <br />
+    Scroll to descend
+  </p>
+  <p class="gb-note" aria-hidden="true">
+    Grey box: palms, palm light, the 8 s ripple and particles are drawn in M2 · keys 2–4 jump to
+    1999, 1888, 1350
+  </p>
+</div>

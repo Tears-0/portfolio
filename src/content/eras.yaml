@@ -1,0 +1,46 @@
+# The four retro-futures, newest first. Each era is what people of its time imagined
+# the ultimate future would be. The time machine reads `charge`, `sign` and `quote`.
+# Quotes are drafts (4 Nov 2026): easy to change later, but each keeps its source.
+- id: '2099'
+  year: 2099
+  act: I
+  title: The Ethereal Singularity
+  dream: Zero friction
+  anchor: top
+  charge: '#9FE7F5' # iris
+- id: '1999'
+  year: 1999
+  act: II
+  title: The Cybernet Grid
+  dream: Cyberspace
+  anchor: works
+  charge: '#39FF7A' # phosphor
+  sign: circuit
+  quote:
+    text: We will create a civilization of the Mind in Cyberspace.
+    by: John Perry Barlow
+    source: A Declaration of the Independence of Cyberspace (1996)
+- id: '1888'
+  year: 1888
+  act: III
+  title: The Engine of Tomorrow
+  dream: Perpetual motion
+  anchor: engine
+  charge: '#C2703D' # copper: brass is too close to 1350's gold to read as a change
+  sign: gear
+  quote:
+    text: The Analytical Engine weaves algebraical patterns just as the Jacquard-loom weaves flowers and leaves.
+    by: Ada Lovelace
+    source: Notes on the Analytical Engine (1843)
+- id: '1350'
+  year: 1350
+  act: IV
+  title: The Grand Magisterium
+  dream: The philosopher's stone
+  anchor: origin
+  charge: '#F5D98B' # rune gold
+  sign: astrolabe
+  quote:
+    text: That which is below is like that which is above.
+    by: The Emerald Tablet
+    source: translated by Isaac Newton

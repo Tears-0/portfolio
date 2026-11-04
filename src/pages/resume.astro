@@ -1,0 +1,29 @@
+---
+import { getEntry } from 'astro:content';
+import '../styles/global.css';
+
+// Placeholder so every "Resume" link works during the prototype. M2 replaces it with the
+// printable, ATS-friendly page that also produces resume.pdf and resume.json.
+const profile = (await getEntry('profile', 'ccy'))?.data;
+if (!profile) throw new Error('Missing profile record');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{profile.name} · Resume</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body class="resume-stub">
+    <main>
+      <h1>{profile.name}</h1>
+      <p>{profile.headline}</p>
+      <p class="gb-note">The full resume, its PDF and JSON arrive in M2.</p>
+      <p>
+        <a href="/">Back to the descent</a>
+      </p>
+    </main>
+  </body>
+</html>

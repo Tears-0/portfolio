@@ -1,0 +1,40 @@
+---
+import type { SceneDef } from '../scenes/registry';
+
+interface Props {
+  scene: SceneDef;
+  /** Deep-link target in stacked mode (#works …); descent mode routes it to a rest point. */
+  anchor?: string;
+  heading?: string;
+}
+const { scene, anchor, heading } = Astro.props;
+const isAct = scene.kind === 'act';
+const Tag = isAct ? 'section' : 'div';
+---
+
+<Tag
+  class:list={['layer', scene.kind]}
+  data-scene={scene.id}
+  data-kind={scene.kind}
+  data-era={scene.era}
+  id={anchor}
+  aria-labelledby={isAct && anchor ? `${anchor}-title` : undefined}
+  aria-hidden={isAct ? undefined : 'true'}
+>
+  <header class="layer-head">
+    {isAct && anchor && heading && (
+      <h2 class="act-title" id={`${anchor}-title`} tabindex="-1">
+        {heading}
+      </h2>
+    )}
+    <p class="gb-tag" aria-hidden="true">
+      {scene.title} · {scene.from}–{scene.to} vh
+    </p>
+    <div class="gb-progress" aria-hidden="true">
+      <span data-progress></span>
+    </div>
+  </header>
+  <div class="beats" data-beats>
+    <slot />
+  </div>
+</Tag>
