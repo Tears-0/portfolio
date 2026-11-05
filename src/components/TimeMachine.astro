@@ -1,40 +1,95 @@
 ---
-// The prologue's light. Press and hold to charge (1.5 s per era); release to travel.
+// The prologue: two hands held out toward the viewer, palms up, cupping one floating light.
+// Press and hold the light to charge (1.5 s per era); release to travel. Storyboard P1–P2.
+import { LIGHT, VIEWBOX, palmShapes } from '../scenes/act-2099/palms';
+
+const { palms, forearms, creases, hintRing } = palmShapes();
+const viewBox = `${VIEWBOX.x} ${VIEWBOX.y} ${VIEWBOX.width} ${VIEWBOX.height}`;
+const { x, y } = LIGHT;
 ---
 
 <div class="tm" data-time-machine data-state="idle">
+  <canvas class="tm-particles" data-tm-particles aria-hidden="true"></canvas>
   <p class="tm-readout" aria-live="polite">
     <span class="tm-year" data-tm-year></span>
     <span class="tm-title" data-tm-title></span>
   </p>
-  <button class="tm-light" type="button" data-tm-light aria-describedby="tm-hint">
-    <svg class="tm-ring" viewBox="0 0 120 120" aria-hidden="true">
-      <circle class="tm-wavy" cx="60" cy="60" r="36"></circle>
-      <circle class="tm-track" cx="60" cy="60" r="46" pathLength="3"></circle>
+  <div class="tm-art">
+    <svg class="tm-hands" viewBox={viewBox} aria-hidden="true">
+      <defs>
+        <linearGradient
+          id="tm-forearm"
+          gradientUnits="userSpaceOnUse"
+          x1="0"
+          y1="118"
+          x2="0"
+          y2="300"
+        >
+          <stop offset="0" stop-color="#161616" stop-opacity="0"></stop>
+          <stop offset="0.75" stop-color="#161616" stop-opacity="0.35"></stop>
+          <stop offset="1" stop-color="#161616" stop-opacity="0.8"></stop>
+        </linearGradient>
+        <radialGradient
+          id="tm-palm-light"
+          gradientUnits="userSpaceOnUse"
+          cx={x}
+          cy={y + 24}
+          r="205"
+        >
+          <stop class="tm-charge-stop" offset="0" stop-opacity="0.62"></stop>
+          <stop class="tm-charge-stop" offset="0.55" stop-opacity="0.18"></stop>
+          <stop class="tm-charge-stop" offset="1" stop-opacity="0"></stop>
+        </radialGradient>
+        <radialGradient id="tm-halo" gradientUnits="userSpaceOnUse" cx={x} cy={y} r="100">
+          <stop class="tm-charge-stop" offset="0" stop-opacity="0.55"></stop>
+          <stop class="tm-charge-stop" offset="1" stop-opacity="0"></stop>
+        </radialGradient>
+        <clipPath id="tm-palms-clip">
+          <path d={palms}></path>
+        </clipPath>
+      </defs>
+      {forearms.map((d) => (
+        <path class="tm-forearm" d={d} fill="url(#tm-forearm)" />
+      ))}
+      <path class="tm-palms" d={palms}></path>
+      <g clip-path="url(#tm-palms-clip)">
+        <ellipse
+          class="tm-palm-light"
+          cx={x}
+          cy={y + 24}
+          rx="205"
+          ry="125"
+          fill="url(#tm-palm-light)"
+        ></ellipse>
+      </g>
+      {creases.map((d) => (
+        <path class="tm-crease" d={d} />
+      ))}
+      <circle class="tm-halo" cx={x} cy={y} r="100" fill="url(#tm-halo)"></circle>
+      <path class="tm-wavy" d={hintRing}></path>
+      <circle class="tm-ripple" cx={x} cy={y} r="34"></circle>
+      <circle class="tm-track" cx={x} cy={y} r="44" pathLength="3"></circle>
       {[0, 1, 2].map((i) => (
         <circle
-          class="tm-segment"
+          class:list={['tm-segment', `seg-${i}`]}
           data-tm-segment
-          cx="60"
-          cy="60"
-          r="46"
+          cx={x}
+          cy={y}
+          r="44"
           pathLength="3"
-          style={`--i:${i}`}
         />
       ))}
+      <circle class="tm-core" cx={x} cy={y} r="13"></circle>
     </svg>
-    <span class="tm-core" aria-hidden="true"></span>
-    <span class="visually-hidden">
-      Time machine: press and hold to travel back, 1.5 seconds per era
-    </span>
-  </button>
+    <button class="tm-light" type="button" data-tm-light aria-describedby="tm-hint">
+      <span class="visually-hidden">
+        Time machine: press and hold to travel back in time, 1.5 seconds per era
+      </span>
+    </button>
+  </div>
   <p class="tm-hint" id="tm-hint">
     Hold to travel
     <br />
     Scroll to descend
-  </p>
-  <p class="gb-note" aria-hidden="true">
-    Grey box: palms, palm light, the 8 s ripple and particles are drawn in M2 · keys 2–4 jump to
-    1999, 1888, 1350
   </p>
 </div>

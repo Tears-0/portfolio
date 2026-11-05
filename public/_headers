@@ -1,0 +1,16 @@
+# Security headers for every response (Cloudflare Workers static assets read this file).
+# The Content-Security-Policy itself is a <meta> tag that Astro writes into each page, with
+# hashes for every inline script and style. HSTS is switched on in the Cloudflare dashboard.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
+
+# The descent is a work in progress until launch (M7).
+/descent
+  X-Robots-Tag: noindex
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

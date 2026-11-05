@@ -6,18 +6,19 @@ ccy:
   headline: Final-year Computer Science student, Monash University Malaysia · applied AI, small-data machine learning, efficient LLM inference
   pitch: I build ML systems that hold up under scrutiny, from small-sample biology to running LLMs on consumer GPUs.
   location: Johor, Malaysia (UTC+8)
+  place: { region: Johor, countryCode: MY } # for resume.json and search engines
   availability: Graduate roles from [add month and year]
   targetRoles:
     - Graduate AI & Data
     - ML engineering
-    - Applied AI
+    - applied AI
   cards:
     - label: Now
       value: Final-year CS, Monash University Malaysia
     - label: Focus
       value: Small-data ML and efficient LLM inference
     - label: Status
-      value: Open to graduate roles from [month]
+      value: Open to graduate roles # add the month once known, e.g. "from Feb 2027"
     - label: Based
       value: Johor, Malaysia · UTC+8
   links:

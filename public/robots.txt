@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+# The descent is a work in progress until launch.
+Disallow: /descent

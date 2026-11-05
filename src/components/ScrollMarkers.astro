@@ -1,6 +1,7 @@
 ---
 import { REST_POINTS, SCENES, TOTAL_VH } from '../scenes/registry';
 
+// Positions go out as data and are applied by markers.ts: the CSP blocks style="…".
 const pct = (vh: number) => `${(vh / TOTAL_VH) * 100}%`;
 ---
 
@@ -10,11 +11,12 @@ const pct = (vh: number) => `${(vh / TOTAL_VH) * 100}%`;
       <span
         class:list={['markers-seg', scene.kind]}
         data-era={scene.era}
-        style={`top:${pct(scene.from)};height:${pct(scene.to - scene.from)}`}
+        data-top={pct(scene.from)}
+        data-height={pct(scene.to - scene.from)}
       />
     ))}
     {REST_POINTS.map((rest) => (
-      <span class="markers-rest" style={`top:${pct(rest.vh)}`} />
+      <span class="markers-rest" data-top={pct(rest.vh)} />
     ))}
     <span class="markers-now" data-markers-now></span>
   </div>

@@ -1,0 +1,10 @@
+# Feeds /resume and resume.json. Dates read "Oct 2026" throughout.
+- id: monash
+  institution: Monash University Malaysia
+  location: Malaysia
+  degree: '[confirm exact title and any specialisation] Bachelor of Computer Science'
+  start: '[add start]'
+  end: '[add expected graduation]'
+  # grade: WAM [add, optional; include only if it strengthens the application]
+  project: '[confirm final title] Multimodal deep learning for small-sample proteomics'
+  units: [] # [add up to 6 relevant units]

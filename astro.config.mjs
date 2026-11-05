@@ -7,4 +7,7 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'never',
   build: { format: 'file' },
+  // A strict Content-Security-Policy <meta> in every page, with hashes for each inline
+  // script and style, so nothing injected can run.
+  security: { csp: true },
 });
