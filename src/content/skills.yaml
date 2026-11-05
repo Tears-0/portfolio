@@ -1,0 +1,84 @@
+# Act III valves. Tiers are words, never percentages: Daily, Comfortable, Familiar.
+# [confirm] every tier; they are drafted from the spec's skills table.
+- id: machine-learning
+  name: Machine Learning
+  order: 1
+  tools:
+    - name: Python
+      tier: Daily
+      evidence: [small-sample-multimodal, reservoir-computing]
+    - name: PyTorch
+      tier: Daily
+      evidence: [small-sample-multimodal, reservoir-computing]
+    - name: ESM-2 protein language models
+      tier: Comfortable
+      evidence: [small-sample-multimodal]
+    - name: Attention and multimodal fusion
+      tier: Comfortable
+      evidence: [small-sample-multimodal]
+    - name: Leakage-safe cross-validation
+      tier: Daily
+      evidence: [small-sample-multimodal]
+    - name: Ablations and permutation tests
+      tier: Comfortable
+      evidence: [small-sample-multimodal]
+    - name: SHAP
+      tier: Familiar
+      evidence: [small-sample-multimodal]
+    - name: Transfer learning
+      tier: Familiar
+      evidence: [small-sample-multimodal]
+- id: llm-inference
+  name: LLM Inference
+  order: 2
+  tools:
+    - name: GGUF · AWQ · GPTQ
+      tier: Daily
+      evidence: [quantization-benchmark]
+    - name: EXL3 · FP8 · NF4
+      tier: Comfortable
+      evidence: [quantization-benchmark]
+    - name: KL-divergence evaluation
+      tier: Daily
+      evidence: [quantization-benchmark]
+    - name: Latency and VRAM profiling
+      tier: Comfortable
+      evidence: [quantization-benchmark]
+    - name: OpenVINO on an NPU
+      tier: Familiar
+      evidence: [quantization-benchmark]
+- id: apps-and-web
+  name: Apps and Web
+  order: 3
+  tools:
+    - name: Flutter and Dart
+      tier: Comfortable
+      evidence: [recovery-companion]
+    - name: Firebase (Firestore)
+      tier: Comfortable
+      evidence: [recovery-companion]
+    - name: TypeScript
+      tier: Comfortable
+      evidence: [four-eras]
+    - name: Astro
+      tier: Familiar
+      evidence: [four-eras]
+- id: infrastructure
+  name: Infrastructure
+  order: 4
+  tools:
+    - name: Linux
+      tier: Daily
+      evidence: [cgnat-self-hosting]
+    - name: WireGuard
+      tier: Comfortable
+      evidence: [cgnat-self-hosting]
+    - name: Oracle Cloud
+      tier: Familiar
+      evidence: [cgnat-self-hosting]
+    - name: 'Cloudflare (DNS, proxy, Workers)'
+      tier: Comfortable
+      evidence: [cgnat-self-hosting, four-eras]
+    - name: Git
+      tier: Daily
+      evidence: [four-eras]

@@ -1,0 +1,46 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <script is:inline>
+      // Pick the mode before first paint. "descent": pinned and scrubbed (desktop, motion
+      // allowed). "stacked": acts one after another with crossfades (reduced motion, narrow
+      // or touch-only screens). ?mode=stacked or ?mode=descent forces one for testing.
+      (() => {
+        const forced = new URLSearchParams(location.search).get('mode');
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const desktop = matchMedia(
+          '(min-width: 900px) and (hover: hover) and (pointer: fine)',
+        ).matches;
+        const mode =
+          forced === 'descent' || forced === 'stacked'
+            ? forced
+            : !reduce && desktop
+              ? 'descent'
+              : 'stacked';
+        document.documentElement.dataset.mode = mode;
+        document.documentElement.classList.add('js');
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="/resume">
+      Skip the journey: go to resume
+    </a>
+    <slot />
+  </body>
+</html>

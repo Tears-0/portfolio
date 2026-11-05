@@ -1,0 +1,6 @@
+dist/
+.astro/
+node_modules/
+package-lock.json
+# The spec is authored as a document, not formatted code.
+*Specification.md

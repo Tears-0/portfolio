@@ -1,0 +1,50 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Act1350 from '../components/acts/Act1350.astro';
+import Act1888 from '../components/acts/Act1888.astro';
+import Act1999 from '../components/acts/Act1999.astro';
+import Act2099 from '../components/acts/Act2099.astro';
+import SceneLayer from '../components/SceneLayer.astro';
+import ScrollMarkers from '../components/ScrollMarkers.astro';
+import TimelineGauge from '../components/TimelineGauge.astro';
+import TimeMachineLoading from '../components/TimeMachineLoading.astro';
+import Descent from '../layouts/Descent.astro';
+import { SCENES, TOTAL_VH, type SceneDef, type SceneId } from '../scenes/registry';
+
+const scene = (id: SceneId): SceneDef => SCENES.find((s) => s.id === id)!;
+
+const eras = (await getCollection('eras'))
+  .map((era) => ({ id: era.id as SceneDef['era'], ...era.data }))
+  .sort((a, b) => b.year - a.year);
+const profile = (await getEntry('profile', 'ccy'))?.data;
+const philosophy = (await getEntry('philosophy', 'main'))?.data;
+if (!profile || !philosophy) throw new Error('Missing profile or philosophy record');
+const projects = (await getCollection('projects', (p) => p.data.featured)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const skills = (await getCollection('skills')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Descent
+  title={`${profile.displayName} · Four Eras`}
+  description={`${profile.name}: ${profile.pitch}`}
+>
+  <TimelineGauge eras={eras} />
+  <main class="track" data-track style={`--total-vh:${TOTAL_VH}`} data-inert-while-travelling>
+    <div class="stage" data-stage>
+      <Act2099 scene={scene('act-2099')} profile={profile} />
+      <SceneLayer scene={scene('shatter')} />
+      <Act1999 scene={scene('act-1999')} projects={projects} />
+      <SceneLayer scene={scene('power-loss')} />
+      <Act1888 scene={scene('act-1888')} skills={skills} />
+      <SceneLayer scene={scene('rust-to-gold')} />
+      <Act1350 scene={scene('act-1350')} philosophy={philosophy} profile={profile} />
+    </div>
+  </main>
+  <TimeMachineLoading eras={eras} />
+  <ScrollMarkers />
+  <script>
+    import { start } from '../engine/descent';
+    start();
+  </script>
+</Descent>

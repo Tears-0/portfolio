@@ -1,0 +1,27 @@
+# Feeds Act I, the static mobile page and /resume. Drafted from the spec's content inventory.
+ccy:
+  name: Chong Chi Yang
+  displayName: ccy
+  greeting: I build systems at the edge of thought. Welcome to the quiet future.
+  headline: Final-year Computer Science student, Monash University Malaysia · applied AI, small-data machine learning, efficient LLM inference
+  pitch: I build ML systems that hold up under scrutiny, from small-sample biology to running LLMs on consumer GPUs.
+  location: Johor, Malaysia (UTC+8)
+  availability: Graduate roles from [add month and year]
+  targetRoles:
+    - Graduate AI & Data
+    - ML engineering
+    - Applied AI
+  cards:
+    - label: Now
+      value: Final-year CS, Monash University Malaysia
+    - label: Focus
+      value: Small-data ML and efficient LLM inference
+    - label: Status
+      value: Open to graduate roles from [month]
+    - label: Based
+      value: Johor, Malaysia · UTC+8
+  links:
+    # [confirm] the address you route with Cloudflare Email Routing.
+    email: hello@cccy.im
+    # [add] github: https://github.com/…
+    # [add] linkedin: https://www.linkedin.com/in/…

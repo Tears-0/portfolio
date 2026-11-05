@@ -1,0 +1,35 @@
+---
+import { TOTAL_VH, eraStart, type EraId } from '../scenes/registry';
+
+interface Props {
+  eras: readonly { id: EraId; year: number; title: string; anchor: string }[];
+}
+const { eras } = Astro.props;
+---
+
+<nav class="gauge" aria-label="Timeline" data-gauge data-era="2099" data-inert-while-travelling>
+  <p class="gauge-year" aria-hidden="true" data-gauge-year>
+    2099.00
+  </p>
+  <div class="gauge-track">
+    <div class="gauge-rail" aria-hidden="true">
+      <span class="gauge-dot"></span>
+    </div>
+    <ol class="gauge-stops">
+      {eras.map((era) => (
+        <li style={`--at:${eraStart(era.id).from / TOTAL_VH}`}>
+          <a href={`#${era.anchor}`} data-era-link={era.id}>
+            {era.year}
+            <span class="visually-hidden">, {era.title}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <a class="gauge-resume" href="/resume">
+    Resume
+  </a>
+  <p class="gauge-skin" aria-hidden="true" data-gauge-skin>
+    skin: laser reticle
+  </p>
+</nav>

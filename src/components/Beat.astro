@@ -1,0 +1,23 @@
+---
+import { SCENES, type SceneId } from '../scenes/registry';
+
+interface Props {
+  scene: SceneId;
+  beat: string;
+  id?: string;
+  class?: string;
+}
+const { scene, beat: beatId, id, class: className } = Astro.props;
+const beat = SCENES.find((s) => s.id === scene)?.beats.find((b) => b.id === beatId);
+if (!beat) throw new Error(`Beat ${scene}/${beatId} is not in the scroll map`);
+const tag = [beat.frames, beat.label, beat.rest === undefined ? null : `rest ${beat.rest} vh`]
+  .filter(Boolean)
+  .join(' · ');
+---
+
+<div class:list={['beat', className]} data-beat={beat.id} id={id}>
+  <p class="gb-tag" aria-hidden="true">
+    {tag}
+  </p>
+  <slot />
+</div>

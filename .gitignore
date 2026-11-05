@@ -1,0 +1,17 @@
+# dependencies and build output
+node_modules/
+dist/
+.astro/
+
+# environment and secrets (never commit)
+.env
+.env.*
+!.env.example
+
+# private resume build (phone number), see the spec's privacy section
+private/
+
+# tooling
+.DS_Store
+*.log
+coverage/

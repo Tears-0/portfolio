@@ -1,0 +1,25 @@
+---
+import { REST_POINTS, SCENES, TOTAL_VH } from '../scenes/registry';
+
+const pct = (vh: number) => `${(vh / TOTAL_VH) * 100}%`;
+---
+
+<aside class="markers" data-markers aria-hidden="true">
+  <div class="markers-ruler">
+    {SCENES.map((scene) => (
+      <span
+        class:list={['markers-seg', scene.kind]}
+        data-era={scene.era}
+        style={`top:${pct(scene.from)};height:${pct(scene.to - scene.from)}`}
+      />
+    ))}
+    {REST_POINTS.map((rest) => (
+      <span class="markers-rest" style={`top:${pct(rest.vh)}`} />
+    ))}
+    <span class="markers-now" data-markers-now></span>
+  </div>
+  <pre class="markers-readout" data-markers-readout></pre>
+  <p class="markers-help">
+    ` hides markers · PgDn / Space next rest · PgUp previous · Home / End · 2–4 in the prologue
+  </p>
+</aside>

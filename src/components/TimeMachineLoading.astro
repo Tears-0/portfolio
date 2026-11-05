@@ -1,0 +1,35 @@
+---
+interface Props {
+  eras: readonly unknown[];
+}
+const { eras } = Astro.props;
+---
+
+<div
+  class="tm-loading"
+  data-tm-loading
+  hidden
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="tm-loading-title"
+>
+  <p class="gb-tag" aria-hidden="true">
+    P3 · Loading screen · constellation shift · at least 5 s
+  </p>
+  <div class="tm-sign" aria-hidden="true">
+    <span data-tm-sign></span>
+  </div>
+  <h2 class="tm-loading-title" id="tm-loading-title" data-tm-loading-title tabindex="-1"></h2>
+  <figure class="tm-quote">
+    <blockquote>
+      <p data-tm-quote></p>
+    </blockquote>
+    <figcaption data-tm-by></figcaption>
+  </figure>
+  <div class="tm-progress" aria-hidden="true">
+    <span></span>
+  </div>
+  <p class="gb-note" aria-hidden="true" data-tm-phase></p>
+  <p class="tm-escape">Esc cancels the jump</p>
+</div>
+<script is:inline type="application/json" id="era-data" set:html={JSON.stringify(eras)} />

@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Types and content schemas
+        run: npm run check
+      - name: Lint
+        run: npm run lint
+      - name: Formatting
+        run: npm run format:check
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build
