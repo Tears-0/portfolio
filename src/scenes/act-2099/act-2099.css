@@ -3,9 +3,9 @@
    nothing loops faster than 8 s. Text never sits on a moving gradient. */
 
 /* The same order as global.css: whichever file loads first sets it, so act styles always win. */
-@layer reset, tokens, base, layout, components, prototype, act-2099;
+@layer reset, tokens, base, layout, components, prototype, scenes;
 
-@layer act-2099 {
+@layer scenes {
   [data-scene='act-2099'],
   .tm-loading {
     --a1-glass: rgb(22 27 36 / 70%);

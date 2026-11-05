@@ -15,4 +15,24 @@ cli:
 resume: { include: true, bullets: [] }
 ---
 
-Case study arrives in M3. Implementation status, screenshots or mock-ups, and a repository or demo link are still to add.
+## The problem
+
+[add case study: the problem the app addresses, and who it is for]
+
+## Design principles
+
+- No cash-equivalent rewards.
+- Rewards and streaks are server-authoritative, so they cannot be changed on the device.
+- [add case study: how the app tapers itself out]
+
+## Build
+
+[add case study: the Flutter and Firebase architecture, and how far the implementation has got]
+
+## Screens
+
+[add case study: two or three screenshots or mock-ups]
+
+## What I would do next
+
+[add case study: the next milestone, and how you would test it with real users]

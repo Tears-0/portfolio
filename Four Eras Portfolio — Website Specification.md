@@ -772,6 +772,34 @@ Rust-to-gold transition, constellations, the philosophy parchment, the transmuta
 - [ ] Readable at every rest point; keyboard and reduced-motion versions complete.
 - [ ] No flashing above three per second.
 
+### Hi-fi art pass (required, scheduled later)
+
+**Everything built so far is lo-fi on purpose: vector shapes, CSS gradients and a 2D canvas, good enough to prove the motion and the pacing. Each entity must later be replaced with real textures and, wherever it is possible within the budgets, a 3D render.** Decided 5 Nov 2026; the timing is still to be set.
+
+- **Keep the lo-fi version as the fallback.** It stays for reduced motion, devices without WebGL and slow connections, so nothing is lost where a render is not possible.
+- **Same budgets.** 60 fps on the reference laptop, at most 400 KB before Act I is interactive and 600 KB per later scene, heavy assets loaded one scene ahead, one shared WebGL context.
+- **Choose per entity:** a pre-rendered image sequence or video where the motion is fixed (scrubbed frames), real-time WebGL (three.js or OGL) where it must react to the cursor or the scroll.
+- **The WebGL decision is reopened** for this pass (see Decisions).
+- **Each milestone adds its entities to the register below** as it builds them.
+
+| Entity | Where | Lo-fi now | Hi-fi target |
+| --- | --- | --- | --- |
+| Palms holding the light | Prologue (P1–P2) | SVG outline, radial-gradient light clipped to the palms | 3D-rendered hands with real skin texture, lit only by the light |
+| The light and its halo | Prologue, I-1 | Layered radial gradients | Real bloom and volumetric glow |
+| Particle surge | Prologue (P2) | 2D canvas streaks | Textured, depth-sorted particles in the shared WebGL context |
+| Constellation loading screen | P3–P4 | SVG stars and line paths | Textured star field with depth and glow; the sign forming in 3D |
+| Ambient light and cursor glow | Act I (I-1 to I-3) | CSS radial gradients | Real light falloff across the glass |
+| Glass identity cards | Act I (I-3) | Backdrop blur and a gradient edge | Real frosted-glass texture with refraction and iridescent edge light |
+| HUD ring | Act I | SVG strokes | Rendered holographic ring |
+| Decay artefacts and scanlines | Act I (I-4) | SVG squares and a CSS gradient | Textured pixel noise and CRT scanlines |
+| Glass shatter | Transition A (A-1, A-2) | A painted stand-in for Act I's last frame on a 2D canvas; straight Voronoi cracks; flat shards | A real snapshot of Act I broken into thick glass shards with refraction, edge highlights and jagged cracks |
+| Phosphor dots | Transition A (A-2) | CSS radial-gradient triads | Rendered RGB phosphor mask with bloom |
+| CRT bulge and scanline | Transition A (A-3), Act II | Rounded black surround, vignette and CSS scanlines | Real barrel distortion of the picture (shader), glass reflection, rolling scanline glow |
+| Grid horizon and data highways | Transition A (A-3), Act II (II-1) | A flat CSS floor in perspective with gradient lines and packets | Rendered neon grid with glow, a horizon sun or skyline, light streaks along the highways |
+| Cartridge rack | Act II (II-1, II-2) | CSS blocks with an amber label | 3D-rendered cartridges with plastic texture, printed labels and an insert animation into the deck |
+| Bevelled windows | Act II (II-2 to II-5) | CSS bevels, a checkerboard dither border | Pixel-accurate 1999 window chrome as bitmaps, with true dithering |
+| Console glow and flicker | Act II (II-4, II-5) | CSS text-shadow and an overlay | Phosphor persistence and bloom on the terminal text |
+
 ### M6 · Continuity and performance (4–6 days)
 
 The timeline gauge's four skins and its morphs, preloading and unloading, a full-descent performance trace, the colophon and credits.
@@ -859,7 +887,8 @@ Cross-browser pass, screen-reader and keyboard pass, final proofreading, then th
 | CLI | Free typing plus suggested-command chips |
 | Contact | Form in the transmutation circle plus links, through a Worker with Turnstile |
 | Smooth scroll | Native scrolling for now |
-| WebGL | Only for the shatter transition and particles |
+| Visual fidelity | Lo-fi first (vector, CSS, 2D canvas); a later art pass replaces existing entities with real textures and 3D renders where possible, keeping the lo-fi art as the fallback (5 Nov 2026) |
+| WebGL | Only for the shatter transition and particles, until the hi-fi art pass decides where 3D renders need it |
 | Collaborators | Not named on the site; project windows link to the existing repository that credits both supervisors |
 
 - [x] **Loading-screen style:** constellation shift (decided 4 Nov 2026 in the storyboard).

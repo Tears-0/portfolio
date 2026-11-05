@@ -5,19 +5,23 @@ retro-futures, with the resume waiting at the bottom. The full design is in
 [the spec](Four%20Eras%20Portfolio%20—%20Website%20Specification.md); the motion is drawn in the
 [storyboard](https://www.figma.com/design/xIS9BkotXQYD09nHclLayh).
 
-**Status: M2.** The static page and the resume are ready to go live; Act I (2099) and the
-time-machine prologue are built in full; Acts II–IV are still grey boxes.
+**Status: M3 built, awaiting review.** The static page and the resume are ready to go live;
+the time-machine prologue, Act I (2099), the shatter and Act II (1999) with its console and
+case-study pages are built; Acts III and IV are on their way. The art is lo-fi on
+purpose (vector, CSS, 2D canvas): a later hi-fi pass replaces it with real textures and 3D
+renders where possible (the spec's "Hi-fi art pass" lists every entity).
 
 ## Pages
 
-| Route                        | What it is                                                                 |
-| ---------------------------- | -------------------------------------------------------------------------- |
-| `/`                          | The static summary everyone sees until launch (M7); phones keep it after   |
-| `/descent`                   | The descent, work in progress (noindex until it replaces `/` on desktop)   |
-| `/resume`                    | One A4 page, ATS-friendly; prints black on white                           |
-| `/Chong-Chi-Yang-Resume.pdf` | Printed from `/resume` by `npm run pdf`                                    |
-| `/resume.json`               | The same resume in the [JSON Resume](https://jsonresume.org/schema) schema |
-| `/404`                       | "Lost in time"                                                             |
+| Route                        | What it is                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `/`                          | The static summary everyone sees until launch (M7); phones keep it after       |
+| `/descent`                   | The descent, work in progress (noindex until it replaces `/` on desktop)       |
+| `/resume`                    | One A4 page, ATS-friendly; prints black on white                               |
+| `/projects/<slug>`           | A case study per featured project; linked and indexed once its body is written |
+| `/Chong-Chi-Yang-Resume.pdf` | Printed from `/resume` by `npm run pdf`                                        |
+| `/resume.json`               | The same resume in the [JSON Resume](https://jsonresume.org/schema) schema     |
+| `/404`                       | "Lost in time"                                                                 |
 
 ## Run it
 
@@ -45,7 +49,9 @@ covers the private resume with your phone number (`npm run pdf:private`).
 | Home / End              | The prologue / the contact portal                                                                    |
 | Hold the light          | Time machine: each 1.5 s goes one era back, through the 5 s loading screen; release sooner to cancel |
 | 2–4 (in the prologue)   | Jump straight to 1999, 1888 or 1350; Esc cancels                                                     |
-| Gauge links, `#works` … | Deep links: `#top`, `#works`, `#engine`, `#origin`, `#contact`                                       |
+| Gauge links, `#works` … | Deep links: `#top`, `#works`, `#engine`, `#origin`, `#contact`, and a 1999 window: `#project-<slug>` |
+| The 1999 console        | Type or press a chip (`help` lists commands); ↑/↓ history, Esc leaves it, Page Up/Down still page    |
+| A window's ✕ or Skip    | On to the next rest point                                                                            |
 | `?at=100`               | Open the descent at any vh, for reviewing a moment                                                   |
 | <code>`</code>          | Show or hide the scroll markers (remembered)                                                         |
 | `?mode=stacked`         | Force the stacked version (what reduced motion and phones get)                                       |
@@ -54,14 +60,19 @@ covers the private resume with your phone number (`npm run pdf:private`).
 
 - `src/scenes/registry.ts`: **the scroll map.** Scenes, beats, rest points and deep links in vh.
   Tune pacing here; the engine, gauge, keyboard paging and markers all read from it.
-- `src/scenes/<scene>/`: one module per act and transition. `act-2099/` is built (scene, styles,
-  the palms and constellation geometry); the others are grey boxes until their milestone.
+- `src/scenes/<scene>/`: one module per act and transition. Built so far: `act-2099/` (scene,
+  styles, the palms and constellation geometry), `t-shatter/` (the shard map and choreography)
+  and `act-1999/` (scene, styles, the grid horizon, the console and its commands). The others
+  are grey boxes until their milestone.
 - `src/engine/`: the master timeline, keyboard and deep links, the gauge, the markers, the time
   machine, its particles and the stacked fallback.
 - `src/content/`: the content records. `content.config.ts` holds their schemas and the spec's
   text limits; the build fails on a missing or over-long field.
 - `src/lib/`: shared readers for the records, the resume builder and the draft rules.
-- `src/pages/`: the static page, the descent, the resume and its JSON, the 404.
+- `src/pages/`: the static page, the descent, the case studies, the resume and its JSON, the 404.
+- `src/data/benchmark.csv`: the quantization results (one row per format, each with its source).
+  The 1999 window's chart, the case study and the console's `stats quantization` read it; until
+  it has rows they say the results are pending.
 - `scripts/`: printing the resume PDF and checking it.
 
 ## Updating content
@@ -69,7 +80,8 @@ covers the private resume with your phone number (`npm run pdf:private`).
 Edit the YAML or Markdown in `src/content/` and run `npm run check`. Values still waiting for
 you start with `[add …]` or `[confirm …]`. The dev server shows them underlined in orange;
 production pages leave out anything still `[add …]`, drop the `[confirm …]` markers, and
-publish a number only once its value and source are both confirmed. To list what is left:
+publish a number only once its value and source are both confirmed. A case study (the Markdown
+body of a featured project) is linked and indexed only once it has no `[add …]` left. To list what is left:
 
 ```bash
 grep -rn "\[add\|\[confirm" src/content

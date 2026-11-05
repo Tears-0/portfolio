@@ -1,0 +1,22 @@
+---
+// Transition A · Shatter (2099 → 1999): the glass of Act I breaks, phosphor glows through,
+// and the screen becomes a CRT showing the grid horizon. Decorative only: the layer is
+// hidden from assistive technology, and stacked mode leaves transitions out.
+import '../scenes/t-shatter/t-shatter.css';
+import type { SceneDef } from '../scenes/registry';
+import GridHorizon from './GridHorizon.astro';
+import SceneLayer from './SceneLayer.astro';
+
+interface Props {
+  scene: SceneDef;
+}
+const { scene } = Astro.props;
+---
+
+<SceneLayer scene={scene}>
+  <div class="ts-phosphor" data-ts-phosphor></div>
+  <GridHorizon />
+  <div class="ts-scanline" data-ts-scanline></div>
+  <canvas class="ts-glass" data-ts-glass></canvas>
+  <div class="ts-crt" data-ts-crt></div>
+</SceneLayer>

@@ -48,6 +48,13 @@ export function formatPeriod(period: { start: string; end?: string }): string | 
   return end ? `${start} – ${end}` : start;
 }
 
+/**
+ * A project's case study is ready once its body is written: production pages only link to
+ * it then (the page itself always exists, kept out of search until it is ready).
+ */
+export const caseStudyReady = (project: CollectionEntry<'projects'>): boolean =>
+  publishText(project.body?.trim() || undefined) !== undefined;
+
 /** "hello@cccy.im" → parts for the obfuscated email (built by JavaScript on the page). */
 export function splitEmail(email: string | undefined) {
   if (!email?.includes('@')) return undefined;

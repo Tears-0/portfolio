@@ -1,0 +1,133 @@
+/* The grid horizon: one CSS floor in perspective, so it costs no canvas and no WebGL.
+   The floor lies flat (rotateX 90°) 120 px below the eye, which sits on the horizon line at
+   the top of the box: rows bunch up toward the horizon and open out toward the viewer. */
+@layer reset, tokens, base, layout, components, prototype, scenes;
+
+@layer scenes {
+  .grid-horizon {
+    --grid-cell: 72px;
+    --grid-back: 1500px; /* how far the floor runs behind the screen, toward the horizon */
+    --grid-front: 520px; /* how far it comes toward the viewer (the eye is at 600 px) */
+
+    position: absolute;
+    inset: 52% 0 0;
+    overflow: hidden;
+    perspective: 600px;
+    perspective-origin: 50% 0;
+    pointer-events: none;
+    mask: linear-gradient(to bottom, transparent, #000 22%);
+  }
+
+  .grid-glow {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: #39ff7a;
+    box-shadow:
+      0 0 24px 6px rgb(57 255 122 / 35%),
+      0 0 90px 30px rgb(255 62 201 / 10%);
+    opacity: 0.8;
+  }
+
+  .grid-plane {
+    position: absolute;
+    top: calc(120px - var(--grid-back));
+    left: 50%;
+    width: 7200px;
+    height: calc(var(--grid-back) + var(--grid-front));
+    margin-left: -3600px;
+    overflow: hidden;
+    transform: rotateX(90deg);
+    transform-origin: 50% var(--grid-back);
+  }
+
+  /* The lines sit on their own layer one cell taller than the floor, so a scene can slide them
+     toward the viewer with --grid-y (0 to one cell, repeating) without the floor moving. */
+  .grid-lines {
+    position: absolute;
+    inset: calc(-1 * var(--grid-cell)) 0 0;
+    background-image:
+      linear-gradient(to right, rgb(31 168 85 / 60%) 2px, transparent 2px),
+      linear-gradient(to bottom, rgb(31 168 85 / 60%) 2px, transparent 2px);
+    background-position: -1px 0;
+    background-size: var(--grid-cell) var(--grid-cell);
+    transform: translateY(var(--grid-y, 0));
+  }
+
+  /* Neon highways run along four of the columns toward the viewer; packets streak along them. */
+  .grid-highway {
+    position: absolute;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    margin-left: -2px;
+    background: linear-gradient(to bottom, transparent, var(--hw) 45%);
+    opacity: 0.85;
+  }
+
+  .hw-1 {
+    --hw: #ff3ec9;
+
+    left: calc(50% - 3 * var(--grid-cell));
+  }
+
+  .hw-2 {
+    --hw: #38e8ff;
+
+    left: calc(50% - var(--grid-cell));
+  }
+
+  .hw-3 {
+    --hw: #38e8ff;
+
+    left: calc(50% + var(--grid-cell));
+  }
+
+  .hw-4 {
+    --hw: #ff3ec9;
+
+    left: calc(50% + 3 * var(--grid-cell));
+  }
+
+  .grid-packet {
+    position: absolute;
+    top: 0;
+    left: -3px;
+    width: 10px;
+    height: 6%;
+    background: #fff;
+    box-shadow: 0 0 14px 3px var(--hw);
+    animation: grid-packet 2.6s linear infinite;
+  }
+
+  .hw-2 .grid-packet {
+    animation-duration: 3.3s;
+    animation-delay: -1s;
+  }
+
+  .hw-3 .grid-packet {
+    animation-duration: 2.9s;
+    animation-delay: -2s;
+  }
+
+  .hw-4 .grid-packet {
+    animation-duration: 3.7s;
+    animation-delay: -0.5s;
+  }
+
+  @keyframes grid-packet {
+    from {
+      translate: 0 0;
+    }
+
+    to {
+      translate: 0 1600%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .grid-packet {
+      display: none;
+    }
+  }
+}
