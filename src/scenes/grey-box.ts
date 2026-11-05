@@ -1,14 +1,10 @@
-import { gsap } from 'gsap';
-import { TOTAL_VH } from './registry';
+import { addBeatFades, sceneTimeline } from './beats';
 import type { SceneContext, SceneModule } from './types';
 
-/** vh over which a beat fades in or out when it has room to. */
-const FADE = 6;
-
 /**
- * M1 stand-in for every scene: labelled boxes at their real vh ranges. Beats that have
- * server-rendered content (`[data-beat]`) fade in and out around their rest points; beats
- * with nothing to read get a decorative grey box naming their storyboard frames.
+ * Stand-in for a scene that is not built yet: labelled boxes at their real vh ranges. Beats
+ * that have server-rendered content (`[data-beat]`) fade in and out around their rest points;
+ * beats with nothing to read get a decorative grey box naming their storyboard frames.
  */
 export function greyBox(): SceneModule {
   const created = new WeakMap<HTMLElement, HTMLElement[]>();
@@ -36,35 +32,12 @@ export function greyBox(): SceneModule {
       created.set(layer, made);
     },
 
-    timeline({ layer, scene }: SceneContext) {
-      const length = scene.to - scene.from;
-      const tl = gsap.timeline({ defaults: { ease: 'none' } });
-      tl.set({}, {}, length); // the timeline always spans the whole scene
-
-      const fill = layer.querySelector('[data-progress]');
+    timeline(ctx: SceneContext) {
+      const tl = sceneTimeline(ctx);
+      const fill = ctx.layer.querySelector('[data-progress]');
+      const length = ctx.scene.to - ctx.scene.from;
       if (fill) tl.fromTo(fill, { scaleX: 0 }, { scaleX: 1, duration: length }, 0);
-
-      for (const beat of scene.beats) {
-        const el = layer.querySelector(`[data-beat="${beat.id}"]`);
-        if (!el) continue;
-        const start = beat.from - scene.from;
-        const end = beat.to - scene.from;
-        const rest = beat.rest === undefined ? undefined : beat.rest - scene.from;
-        const shownAtStart = beat.from === 0;
-        const shownAtEnd = beat.to >= TOTAL_VH;
-        // Fully opaque by the rest point, and still fully opaque at it.
-        const inEnd = rest === undefined ? start + FADE : Math.min(rest, start + FADE);
-        const outStart = rest === undefined ? end - FADE : Math.max(rest, end - FADE);
-        tl.fromTo(
-          el,
-          { autoAlpha: shownAtStart ? 1 : 0 },
-          { autoAlpha: 1, duration: Math.max(0.01, inEnd - start) },
-          start,
-        );
-        if (!shownAtEnd) {
-          tl.to(el, { autoAlpha: 0, duration: Math.max(0.01, end - outStart) }, outStart);
-        }
-      }
+      addBeatFades(tl, ctx);
       return tl;
     },
 

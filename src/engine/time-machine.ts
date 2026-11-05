@@ -1,5 +1,6 @@
 import type { EraId } from '../scenes/registry';
 import { isTyping } from './keys';
+import type { Particles } from './particles';
 
 export interface EraData {
   id: EraId;
@@ -18,6 +19,8 @@ export interface TimeMachineOptions {
   preload(era: EraData): Promise<void>;
   /** Jumps to the era's first rest point and returns the heading to focus there. */
   travelTo(era: EraData): Promise<HTMLElement | null>;
+  /** The particle surge while charging; left out with reduced motion. */
+  particles?: Particles;
 }
 
 /** Holding the light skips one era every 1.5 s. */
@@ -33,13 +36,6 @@ export const MIN_LOADING_MS = 5000;
 export function erasBack(elapsed: number, jumps: number): number {
   return Math.min(jumps, Math.max(0, Math.floor(elapsed / STEP_MS)));
 }
-
-const PHASES: readonly (readonly [number, string])[] = [
-  [500, 'stars gather'],
-  [3000, 'rotate and link into the sign'],
-  [4600, 'hold'],
-  [5000, 'land'],
-];
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -62,8 +58,7 @@ export function initTimeMachine(
   const loadingTitle = overlay.querySelector<HTMLElement>('[data-tm-loading-title]')!;
   const quoteText = overlay.querySelector<HTMLElement>('[data-tm-quote]')!;
   const quoteBy = overlay.querySelector<HTMLElement>('[data-tm-by]')!;
-  const signEl = overlay.querySelector<HTMLElement>('[data-tm-sign]')!;
-  const phaseEl = overlay.querySelector<HTMLElement>('[data-tm-phase]')!;
+  const { particles } = opts;
   const inertWhileTravelling = [
     ...document.querySelectorAll<HTMLElement>('[data-inert-while-travelling]'),
   ];
@@ -85,6 +80,8 @@ export function initTimeMachine(
     const target = back === 0 ? undefined : destinations[back - 1];
     root.style.setProperty('--charge', (target ?? now).charge);
     root.dataset.level = String(back);
+    particles?.setColor((target ?? now).charge);
+    particles?.setLevel(back);
     yearEl.textContent = charging && target ? String(target.year) : '';
     titleEl.textContent = !charging
       ? ''
@@ -103,6 +100,7 @@ export function initTimeMachine(
     charging = true;
     pressedAt = performance.now();
     root.dataset.state = 'charging';
+    particles?.start();
     tick();
   }
 
@@ -111,6 +109,7 @@ export function initTimeMachine(
     const back = erasBack(performance.now() - pressedAt, destinations.length);
     charging = false;
     cancelAnimationFrame(frame);
+    particles?.release();
     root.dataset.state = 'idle';
     render(0);
     return back;
@@ -130,7 +129,7 @@ export function initTimeMachine(
     loadingTitle.textContent = `${era.year} · ${era.title}`;
     quoteText.textContent = era.quote ? `“${era.quote.text}”` : '';
     quoteBy.textContent = era.quote ? `${era.quote.by}, ${era.quote.source}` : '';
-    signEl.textContent = era.sign ?? '';
+    overlay.dataset.sign = era.sign ?? '';
     overlay.style.setProperty('--charge', era.charge);
     overlay.dataset.slow = 'false';
     overlay.hidden = false;
@@ -140,21 +139,11 @@ export function initTimeMachine(
     for (const el of inertWhileTravelling) el.inert = true;
     loadingTitle.focus();
 
-    const opened = performance.now();
-    let phaseFrame = 0;
-    const showPhase = () => {
-      const t = performance.now() - opened;
-      phaseEl.textContent =
-        PHASES.find(([until]) => t < until)?.[1] ??
-        (overlay.dataset.slow === 'true' ? 'still loading' : 'land');
-      phaseFrame = requestAnimationFrame(showPhase);
-    };
-    showPhase();
+    // Past 5 s and still loading: the sign keeps turning and a plain progress line shows.
     const slowTimer = setTimeout(() => (overlay.dataset.slow = 'true'), MIN_LOADING_MS);
 
     let cancelled = false;
     const close = () => {
-      cancelAnimationFrame(phaseFrame);
       clearTimeout(slowTimer);
       overlay.classList.remove('is-open');
       overlay.hidden = true;

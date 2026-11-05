@@ -1,0 +1,38 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/space-grotesk';
+import '../styles/site.css';
+import { SITE_URL } from '../lib/content';
+
+interface Props {
+  title: string;
+  description: string;
+  /** schema.org data for search engines, e.g. the Person on the home page. */
+  jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
+  class?: string;
+}
+const { title, description, jsonLd, noindex = false, class: className } = Astro.props;
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body class={className}>
+    <slot />
+  </body>
+</html>

@@ -55,12 +55,13 @@ export const SCENES: readonly SceneDef[] = [
         anchor: 'top',
       },
       { id: 'greeting', frames: 'I-2', label: 'Greeting resolved', from: 18, to: 70, rest: 30 },
+      // The cards stay through the decay (I-4), drifting apart, until the glass shatters.
       {
         id: 'identity',
-        frames: 'I-3',
+        frames: 'I-3 · I-4',
         label: 'Identity cards floating',
         from: 62,
-        to: 138,
+        to: 148,
         rest: 100,
       },
       {

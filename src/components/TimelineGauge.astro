@@ -17,7 +17,7 @@ const { eras } = Astro.props;
     </div>
     <ol class="gauge-stops">
       {eras.map((era) => (
-        <li style={`--at:${eraStart(era.id).from / TOTAL_VH}`}>
+        <li data-at={eraStart(era.id).from / TOTAL_VH}>
           <a href={`#${era.anchor}`} data-era-link={era.id}>
             {era.year}
             <span class="visually-hidden">, {era.title}</span>

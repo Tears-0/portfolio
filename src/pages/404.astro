@@ -1,0 +1,43 @@
+---
+import Site from '../layouts/Site.astro';
+---
+
+<Site title="Lost in time · cccy.im" description="This page is not in any era." noindex>
+  <main class="lost">
+    <p class="year" aria-hidden="true">
+      404
+    </p>
+    <h1>Lost in time</h1>
+    <p>This page slipped out of every era: not in 2099, 1999, 1888 or 1350.</p>
+    <p class="links">
+      <a href="/">Back to the start</a> · <a href="/resume">Resume</a>
+    </p>
+  </main>
+</Site>
+
+<style>
+  .lost {
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    width: min(36rem, 100% - 2rem);
+    min-height: 100vh;
+    margin-inline: auto;
+  }
+
+  .year {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    color: var(--iris);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 7vw, 3rem);
+  }
+
+  .links {
+    display: flex;
+    gap: 0.75rem;
+  }
+</style>

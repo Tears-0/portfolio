@@ -17,6 +17,10 @@ export function createGauge(nav: HTMLElement): Gauge {
   const skin = nav.querySelector<HTMLElement>('[data-gauge-skin]');
   const links = [...nav.querySelectorAll<HTMLAnchorElement>('[data-era-link]')];
   let lastScene: SceneId | undefined;
+  // Positions arrive as data: the Content-Security-Policy blocks style="…" in the markup.
+  for (const stop of nav.querySelectorAll<HTMLElement>('[data-at]')) {
+    stop.style.setProperty('--at', stop.dataset.at ?? '0');
+  }
 
   return {
     update(vh) {

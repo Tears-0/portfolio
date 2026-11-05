@@ -1,8 +1,9 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import type { SceneDef } from '../../scenes/registry';
-import { hasPlaceholder } from '../../lib/placeholder';
+import { SHOW_DRAFTS, hasPlaceholder, publishText } from '../../lib/placeholder';
 import Beat from '../Beat.astro';
+import Email from '../Email.astro';
 import SceneLayer from '../SceneLayer.astro';
 
 interface Props {
@@ -11,8 +12,8 @@ interface Props {
   profile: CollectionEntry<'profile'>['data'];
 }
 const { scene, philosophy, profile } = Astro.props;
-// Shown as text until M2 builds the mailto link with JavaScript (privacy section of the spec).
-const email = profile.links.email?.replace('@', ' [at] ');
+const body = publishText(philosophy.body);
+const origin = publishText(philosophy.origin);
 ---
 
 <SceneLayer scene={scene} anchor="origin" heading="1350 · Origin">
@@ -21,9 +22,13 @@ const email = profile.links.email?.replace('@', ' [at] ');
       <blockquote class="closing-line">
         <p>{philosophy.closingLine}</p>
       </blockquote>
-      <p class:list={{ draft: hasPlaceholder(philosophy.body) }}>{philosophy.body}</p>
-      <h3>Origin</h3>
-      <p class:list={{ draft: hasPlaceholder(philosophy.origin) }}>{philosophy.origin}</p>
+      {body && <p class:list={{ draft: hasPlaceholder(body) }}>{body}</p>}
+      {origin && (
+        <>
+          <h3>Origin</h3>
+          <p class:list={{ draft: hasPlaceholder(origin) }}>{origin}</p>
+        </>
+      )}
     </div>
   </Beat>
   <Beat scene="act-1350" beat="contact" id="contact">
@@ -49,20 +54,24 @@ const email = profile.links.email?.replace('@', ' [at] ');
         </p>
       </form>
       <ul class="outer-ring" aria-label="Other ways to reach me">
-        {email && <li>{email}</li>}
+        {profile.links.email && (
+          <li>
+            <Email email={profile.links.email} />
+          </li>
+        )}
         {profile.links.linkedin ? (
           <li>
             <a href={profile.links.linkedin}>LinkedIn</a>
           </li>
         ) : (
-          <li class="draft">LinkedIn [add]</li>
+          SHOW_DRAFTS && <li class="draft">LinkedIn [add]</li>
         )}
         {profile.links.github ? (
           <li>
             <a href={profile.links.github}>GitHub</a>
           </li>
         ) : (
-          <li class="draft">GitHub [add]</li>
+          SHOW_DRAFTS && <li class="draft">GitHub [add]</li>
         )}
         <li>
           <a href="/resume">Unfurl the resume</a>

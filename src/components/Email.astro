@@ -1,0 +1,52 @@
+---
+import { splitEmail } from '../lib/content';
+
+interface Props {
+  email: string | undefined;
+  /** Show a "Copy email" button next to the link. */
+  copy?: boolean;
+  class?: string;
+}
+const { email, copy = false, class: className } = Astro.props;
+const parts = splitEmail(email);
+---
+
+{parts && (
+  <span
+    class:list={['email', className]}
+    data-email-user={parts.user}
+    data-email-domain={parts.domain}
+    data-email-copy={copy ? '' : undefined}
+  >
+    <span class="email-fallback">
+      {parts.user} [at] {parts.domain}
+    </span>
+  </span>
+)}
+
+<script>
+  // The address is assembled here so it never sits in the HTML for scrapers; without
+  // JavaScript the "hello [at] cccy.im" text stays.
+  for (const holder of document.querySelectorAll<HTMLElement>('[data-email-user]')) {
+    const address = `${holder.dataset.emailUser}@${holder.dataset.emailDomain}`;
+    const link = document.createElement('a');
+    link.href = `mailto:${address}`;
+    link.textContent = address;
+    holder.replaceChildren(link);
+    if (holder.dataset.emailCopy === undefined || !navigator.clipboard) continue;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'email-copy';
+    button.textContent = 'Copy email';
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(address);
+        button.textContent = 'Copied';
+      } catch {
+        button.textContent = 'Copy failed';
+      }
+      setTimeout(() => (button.textContent = 'Copy email'), 2000);
+    });
+    holder.append(' ', button);
+  }
+</script>

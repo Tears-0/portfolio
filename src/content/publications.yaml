@@ -1,0 +1,6 @@
+# Feeds the resume's Research section. Status follows reality: "In preparation", then
+# "Submitted to RECOMB 2027" only once submitted, then "Under review", then "Accepted".
+- id: fyp-paper
+  title: '[confirm final title] Multimodal deep learning for small-sample proteomics'
+  status: In preparation
+  project: small-sample-multimodal

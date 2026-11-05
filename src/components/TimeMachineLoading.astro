@@ -1,35 +1,59 @@
 ---
+// The time machine's loading screen (storyboard P3–P4): stars turn and link into the
+// destination's sign while that era's quote shows. Always plays its full 5 s.
+import { SIGNS, starField, type SignKind } from '../scenes/act-2099/signs';
+
 interface Props {
   eras: readonly unknown[];
 }
 const { eras } = Astro.props;
+const stars = starField(150, 1500, 960);
+const signs = Object.entries(SIGNS) as [SignKind, (typeof SIGNS)[SignKind]][];
 ---
 
 <div
   class="tm-loading"
   data-tm-loading
+  data-sign=""
   hidden
   role="dialog"
   aria-modal="true"
   aria-labelledby="tm-loading-title"
 >
-  <p class="gb-tag" aria-hidden="true">
-    P3 · Loading screen · constellation shift · at least 5 s
-  </p>
-  <div class="tm-sign" aria-hidden="true">
-    <span data-tm-sign></span>
+  <svg
+    class="tm-sky"
+    viewBox="-750 -480 1500 960"
+    preserveAspectRatio="xMidYMid slice"
+    aria-hidden="true"
+  >
+    <g class="tm-field">
+      {stars.map((s) => (
+        <circle cx={s.x.toFixed(1)} cy={s.y.toFixed(1)} r={s.r} opacity={s.o.toFixed(2)} />
+      ))}
+    </g>
+    {signs.map(([kind, sign]) => (
+      <g class="tm-sign" data-kind={kind}>
+        {sign.lines.map((d) => (
+          <path class="tm-sign-line" d={d} pathLength="1" />
+        ))}
+        {sign.stars.map(([sx, sy]) => (
+          <circle class="tm-sign-star" cx={sx.toFixed(1)} cy={sy.toFixed(1)} r="3" />
+        ))}
+      </g>
+    ))}
+  </svg>
+  <div class="tm-loading-text">
+    <h2 class="tm-loading-title" id="tm-loading-title" data-tm-loading-title tabindex="-1"></h2>
+    <figure class="tm-quote">
+      <blockquote>
+        <p data-tm-quote></p>
+      </blockquote>
+      <figcaption data-tm-by></figcaption>
+    </figure>
+    <div class="tm-progress" aria-hidden="true">
+      <span></span>
+    </div>
+    <p class="tm-escape">Esc cancels the jump</p>
   </div>
-  <h2 class="tm-loading-title" id="tm-loading-title" data-tm-loading-title tabindex="-1"></h2>
-  <figure class="tm-quote">
-    <blockquote>
-      <p data-tm-quote></p>
-    </blockquote>
-    <figcaption data-tm-by></figcaption>
-  </figure>
-  <div class="tm-progress" aria-hidden="true">
-    <span></span>
-  </div>
-  <p class="gb-note" aria-hidden="true" data-tm-phase></p>
-  <p class="tm-escape">Esc cancels the jump</p>
 </div>
 <script is:inline type="application/json" id="era-data" set:html={JSON.stringify(eras)} />

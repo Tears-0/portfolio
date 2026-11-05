@@ -1,7 +1,8 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import type { SceneDef } from '../../scenes/registry';
-import { hasPlaceholder } from '../../lib/placeholder';
+import { STATUS_LABEL, formatPeriod } from '../../lib/content';
+import { hasPlaceholder, publishMetric, publishText } from '../../lib/placeholder';
 import Beat from '../Beat.astro';
 import SceneLayer from '../SceneLayer.astro';
 
@@ -11,19 +12,15 @@ interface Props {
   projects: CollectionEntry<'projects'>[];
 }
 const { scene, projects } = Astro.props;
-
-const STATUS: Record<CollectionEntry<'projects'>['data']['status'], string> = {
-  completed: 'Completed',
-  'in-progress': 'In progress',
-  'under-review': 'Under review',
-  archived: 'Archived',
-};
 const COMMANDS = ['ls projects', 'run cartridge_02.exe', 'stats quantization', 'help'];
 ---
 
 <SceneLayer scene={scene} anchor="works" heading="1999 · Works">
   {projects.slice(0, 4).map((project, i) => {
     const { data } = project;
+    const role = publishText(data.role);
+    const period = formatPeriod(data.period);
+    const highlight = publishMetric(data.highlight);
     return (
       <Beat scene="act-1999" beat={`project-${i + 1}`}>
         <article class="window" aria-labelledby={`project-${project.id}`}>
@@ -33,19 +30,21 @@ const COMMANDS = ['ls projects', 'run cartridge_02.exe', 'stats quantization', '
           <h3 id={`project-${project.id}`}>{data.title}</h3>
           <p class="summary">{data.summary}</p>
           <dl class="meta">
-            <div>
-              <dt>Role</dt>
-              <dd class:list={{ draft: hasPlaceholder(data.role) }}>{data.role}</dd>
-            </div>
-            <div>
-              <dt>Period</dt>
-              <dd class:list={{ draft: hasPlaceholder(data.period.start) }}>
-                {data.period.start} – {data.period.end ?? 'now'}
-              </dd>
-            </div>
+            {role && (
+              <div>
+                <dt>Role</dt>
+                <dd class:list={{ draft: hasPlaceholder(role) }}>{role}</dd>
+              </div>
+            )}
+            {period && (
+              <div>
+                <dt>Period</dt>
+                <dd class:list={{ draft: hasPlaceholder(period) }}>{period}</dd>
+              </div>
+            )}
             <div>
               <dt>Status</dt>
-              <dd>{STATUS[data.status]}</dd>
+              <dd>{STATUS_LABEL[data.status]}</dd>
             </div>
           </dl>
           <ul class="tags" aria-label="Tags">
@@ -53,14 +52,14 @@ const COMMANDS = ['ls projects', 'run cartridge_02.exe', 'stats quantization', '
               <li>{tag}</li>
             ))}
           </ul>
-          {data.highlight && (
+          {highlight && (
             <p class="highlight">
-              <strong class:list={{ draft: hasPlaceholder(data.highlight.value) }}>
-                {data.highlight.value}
+              <strong class:list={{ draft: hasPlaceholder(highlight.value) }}>
+                {highlight.value}
               </strong>
-              <span>{data.highlight.label}</span>
-              <span class:list={['source', { draft: hasPlaceholder(data.highlight.source) }]}>
-                Source: {data.highlight.source}
+              <span>{highlight.label}</span>
+              <span class:list={['source', { draft: hasPlaceholder(highlight.source) }]}>
+                Source: {highlight.source}
               </span>
             </p>
           )}

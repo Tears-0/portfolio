@@ -15,6 +15,7 @@ import {
   vhToY,
   yToVh,
 } from './navigation';
+import { createParticles, type Particles } from './particles';
 import { initStacked } from './stacked';
 import { initTimeMachine, type EraData } from './time-machine';
 
@@ -31,6 +32,17 @@ interface Shared {
 const PROLOGUE_END_VH = 22;
 
 const headingFor = (anchor: string) => document.getElementById(`${anchor}-title`);
+
+/** The prologue's particle surge, aimed at the centre of the light. None with reduced motion. */
+function prologueParticles(reduced: boolean): Particles | undefined {
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-tm-particles]');
+  const light = document.querySelector<HTMLElement>('[data-tm-light]');
+  if (reduced || !canvas || !light) return undefined;
+  return createParticles(canvas, () => {
+    const box = light.getBoundingClientRect();
+    return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  });
+}
 
 /**
  * Entry point. The inline script in the layout picks the mode before first paint:
@@ -158,11 +170,14 @@ function startDescent({ eras, gauge, markers, reduced }: Shared) {
         await goTo(ANCHORS[era.anchor] ?? 0, { instant: true });
         return headingFor(era.anchor);
       },
+      particles: prologueParticles(reduced),
     },
   );
 
+  // A deep link, or ?at=<vh> to open anywhere in the descent while reviewing pacing.
   const initial = anchorToVh(location.hash);
-  void goTo(initial ?? 0, {
+  const at = Number(new URLSearchParams(location.search).get('at'));
+  void goTo(initial ?? (Number.isFinite(at) ? at : 0), {
     instant: true,
     focus: initial === undefined ? null : headingFor(location.hash.slice(1)),
   }).then(onScroll);
@@ -170,7 +185,7 @@ function startDescent({ eras, gauge, markers, reduced }: Shared) {
   setTimeout(() => void master.loadAll(vhNow()), 1200);
 }
 
-function startStacked({ eras, gauge, markers }: Shared) {
+function startStacked({ eras, gauge, markers, reduced }: Shared) {
   const acts = [...document.querySelectorAll<HTMLElement>('[data-scene][data-kind="act"]')];
   const vhNow = initStacked(acts);
   let queued = false;
@@ -203,6 +218,7 @@ function startStacked({ eras, gauge, markers }: Shared) {
         document.getElementById(era.anchor)?.scrollIntoView({ block: 'start' });
         return headingFor(era.anchor);
       },
+      particles: prologueParticles(reduced),
     },
   );
 }

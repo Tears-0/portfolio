@@ -1,0 +1,18 @@
+// Cloudflare Workers static assets: the built site in dist/, no server code.
+// Deploys run from GitHub Actions (see DEPLOY.md); `npx wrangler deploy` works locally once
+// you have run `npx wrangler login`.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cccy-portfolio",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+  },
+  // A preview URL per pull request (wrangler versions upload --preview-alias pr-N).
+  "preview_urls": true,
+  // Uncomment once the apex is free (DEPLOY.md, step 3). The Minecraft records stay as they are:
+  // a custom domain only adds the record for the hostname named here.
+  // "routes": [{ "pattern": "cccy.im", "custom_domain": true }],
+}

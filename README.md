@@ -5,8 +5,19 @@ retro-futures, with the resume waiting at the bottom. The full design is in
 [the spec](Four%20Eras%20Portfolio%20—%20Website%20Specification.md); the motion is drawn in the
 [storyboard](https://www.figma.com/design/xIS9BkotXQYD09nHclLayh).
 
-**Status: M1, the grey-box prototype.** Every scene is a labelled box at its real scroll range, so
-the pacing can be felt before any art is made.
+**Status: M2.** The static page and the resume are ready to go live; Act I (2099) and the
+time-machine prologue are built in full; Acts II–IV are still grey boxes.
+
+## Pages
+
+| Route                        | What it is                                                                 |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| `/`                          | The static summary everyone sees until launch (M7); phones keep it after   |
+| `/descent`                   | The descent, work in progress (noindex until it replaces `/` on desktop)   |
+| `/resume`                    | One A4 page, ATS-friendly; prints black on white                           |
+| `/Chong-Chi-Yang-Resume.pdf` | Printed from `/resume` by `npm run pdf`                                    |
+| `/resume.json`               | The same resume in the [JSON Resume](https://jsonresume.org/schema) schema |
+| `/404`                       | "Lost in time"                                                             |
 
 ## Run it
 
@@ -14,13 +25,18 @@ Node 22.23 or newer.
 
 ```bash
 npm install
+npx playwright install chromium
 npm run dev
 ```
 
-Open <http://localhost:4321>. `npm run verify` runs everything CI runs: types and content schemas,
-lint, formatting, unit tests and the build.
+Open <http://localhost:4321>. `npm run verify` runs everything CI runs: types and content
+schemas, lint, formatting, unit tests, the build, checks on the built site, and the resume PDF
+with its checks (one page, embedded fonts, standard section order, under 300 KB).
 
-## Trying the prototype
+Deploying to cccy.im needs your Cloudflare account: see [DEPLOY.md](DEPLOY.md). That file also
+covers the private resume with your phone number (`npm run pdf:private`).
+
+## Trying the descent
 
 | Control                 | What it does                                                                                         |
 | ----------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -30,6 +46,7 @@ lint, formatting, unit tests and the build.
 | Hold the light          | Time machine: each 1.5 s goes one era back, through the 5 s loading screen; release sooner to cancel |
 | 2–4 (in the prologue)   | Jump straight to 1999, 1888 or 1350; Esc cancels                                                     |
 | Gauge links, `#works` … | Deep links: `#top`, `#works`, `#engine`, `#origin`, `#contact`                                       |
+| `?at=100`               | Open the descent at any vh, for reviewing a moment                                                   |
 | <code>`</code>          | Show or hide the scroll markers (remembered)                                                         |
 | `?mode=stacked`         | Force the stacked version (what reduced motion and phones get)                                       |
 
@@ -37,18 +54,22 @@ lint, formatting, unit tests and the build.
 
 - `src/scenes/registry.ts`: **the scroll map.** Scenes, beats, rest points and deep links in vh.
   Tune pacing here; the engine, gauge, keyboard paging and markers all read from it.
-- `src/scenes/<scene>/scene.ts`: one module per act and transition (grey boxes for now).
+- `src/scenes/<scene>/`: one module per act and transition. `act-2099/` is built (scene, styles,
+  the palms and constellation geometry); the others are grey boxes until their milestone.
 - `src/engine/`: the master timeline, keyboard and deep links, the gauge, the markers, the time
-  machine and the stacked fallback.
+  machine, its particles and the stacked fallback.
 - `src/content/`: the content records. `content.config.ts` holds their schemas and the spec's
   text limits; the build fails on a missing or over-long field.
-- `src/components/`: the acts, the gauge and the time machine as Astro components.
+- `src/lib/`: shared readers for the records, the resume builder and the draft rules.
+- `src/pages/`: the static page, the descent, the resume and its JSON, the 404.
+- `scripts/`: printing the resume PDF and checking it.
 
 ## Updating content
 
 Edit the YAML or Markdown in `src/content/` and run `npm run check`. Values still waiting for
-you start with `[add …]` or `[confirm …]`; the schemas accept them so the build stays green, and
-the page underlines them in orange. To list what is left:
+you start with `[add …]` or `[confirm …]`. The dev server shows them underlined in orange;
+production pages leave out anything still `[add …]`, drop the `[confirm …]` markers, and
+publish a number only once its value and source are both confirmed. To list what is left:
 
 ```bash
 grep -rn "\[add\|\[confirm" src/content

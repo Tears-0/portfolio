@@ -1,29 +1,353 @@
 ---
-import { getEntry } from 'astro:content';
-import '../styles/global.css';
+// The resume: one page, A4, ATS-friendly, black on white in print. CI prints this page to
+// resume.pdf; resume.json serialises the same data. Sections with nothing in them drop out.
+// Static weights, not the variable font: Chrome embeds variable fonts in PDFs as Type 3,
+// which some applicant tracking systems cannot read.
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import Email from '../components/Email.astro';
+import Site from '../layouts/Site.astro';
+import { RESUME_PDF } from '../lib/content';
+import { hasPlaceholder } from '../lib/placeholder';
+import { buildResume, privatePhone } from '../lib/resume';
 
-// Placeholder so every "Resume" link works during the prototype. M2 replaces it with the
-// printable, ATS-friendly page that also produces resume.pdf and resume.json.
-const profile = (await getEntry('profile', 'ccy'))?.data;
-if (!profile) throw new Error('Missing profile record');
+const resume = await buildResume({ phone: privatePhone() });
+const pdfName = `${resume.name.replaceAll(' ', '-')}-Resume.pdf`;
+const dates = (start?: string, end?: string) => [start, end].filter(Boolean).join(' – ');
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{profile.name} · Resume</title>
-    <meta name="robots" content="noindex" />
-  </head>
-  <body class="resume-stub">
-    <main>
-      <h1>{profile.name}</h1>
-      <p>{profile.headline}</p>
-      <p class="gb-note">The full resume, its PDF and JSON arrive in M2.</p>
-      <p>
-        <a href="/">Back to the descent</a>
+<Site
+  title={`${resume.name} · Resume`}
+  description={`Resume of ${resume.name}: ${resume.summary}`}
+  class="resume-page"
+>
+  <nav class="toolbar no-print" aria-label="Resume">
+    <a href="/">cccy.im</a>
+    <span class="toolbar-actions">
+      <a class="tool" href={RESUME_PDF} download={pdfName}>
+        Download PDF
+      </a>
+      <button class="tool" type="button" data-print hidden>
+        Print
+      </button>
+      <a class="tool" href="/resume.json">
+        View JSON
+      </a>
+    </span>
+  </nav>
+
+  <main class="sheet">
+    <header class="head">
+      <h1>{resume.name}</h1>
+      <p class="label">{resume.label}</p>
+      <p class="contact">
+        <span>{resume.location}</span>
+        {resume.email && (
+          <span>
+            <Email email={resume.email} />
+          </span>
+        )}
+        {resume.phone && <span>{resume.phone}</span>}
+        <span>
+          <a href={resume.url} data-print-plain>
+            cccy.im
+          </a>
+        </span>
+        {resume.profiles.map((p) => (
+          <span>
+            <a href={p.url} data-print-plain>
+              {p.text}
+            </a>
+          </span>
+        ))}
       </p>
-    </main>
-  </body>
-</html>
+    </header>
+
+    <section aria-labelledby="summary">
+      <h2 id="summary">Summary</h2>
+      <p class:list={{ draft: hasPlaceholder(resume.summary) }}>{resume.summary}</p>
+    </section>
+
+    {resume.education.length > 0 && (
+      <section aria-labelledby="education">
+        <h2 id="education">Education</h2>
+        {resume.education.map((e) => (
+          <div class="entry">
+            <p class="entry-head">
+              <strong>{e.institution}</strong>
+              <span class:list={['dates', { draft: hasPlaceholder(dates(e.start, e.end)) }]}>
+                {dates(e.start, e.end)}
+              </span>
+            </p>
+            {e.degree && <p class:list={{ draft: hasPlaceholder(e.degree) }}>{e.degree}</p>}
+            {e.project && (
+              <p class:list={{ draft: hasPlaceholder(e.project) }}>
+                Final-year project: {e.project}
+              </p>
+            )}
+            {e.grade && <p>{e.grade}</p>}
+            {e.units.length > 0 && <p>Relevant units: {e.units.join(', ')}</p>}
+          </div>
+        ))}
+      </section>
+    )}
+
+    {resume.projects.length > 0 && (
+      <section aria-labelledby="projects">
+        <h2 id="projects">Projects</h2>
+        {resume.projects.map((p) => (
+          <div class="entry">
+            <p class="entry-head">
+              <strong>{p.title}</strong>
+              {p.period && (
+                <span class:list={['dates', { draft: hasPlaceholder(p.period) }]}>{p.period}</span>
+              )}
+            </p>
+            {(p.role || p.link) && (
+              <p class="sub">
+                {p.role && <span class:list={{ draft: hasPlaceholder(p.role) }}>{p.role}</span>}
+                {p.link && (
+                  <a href={p.link.href} data-print-plain>
+                    {p.link.text}
+                  </a>
+                )}
+              </p>
+            )}
+            <ul>
+              {p.bullets.map((b) => (
+                <li>{b}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
+    )}
+
+    {resume.research.length > 0 && (
+      <section aria-labelledby="research">
+        <h2 id="research">Research</h2>
+        {resume.research.map((r) => (
+          <p class="entry">
+            <span class:list={{ draft: hasPlaceholder(r.title) }}>{r.title}</span> ({r.status})
+          </p>
+        ))}
+      </section>
+    )}
+
+    {resume.experience.length > 0 && (
+      <section aria-labelledby="experience">
+        <h2 id="experience">Experience</h2>
+        {resume.experience.map((x) => (
+          <p class="entry">{x.title}</p>
+        ))}
+      </section>
+    )}
+
+    <section aria-labelledby="skills">
+      <h2 id="skills">Skills</h2>
+      <dl class="skills">
+        {resume.skills.map((s) => (
+          <div>
+            <dt>{s.name}:</dt> <dd>{s.keywords.join(', ')}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    {resume.awards.length > 0 && (
+      <section aria-labelledby="awards">
+        <h2 id="awards">Awards</h2>
+        {resume.awards.map((a) => (
+          <p class="entry">{a.title}</p>
+        ))}
+      </section>
+    )}
+  </main>
+</Site>
+
+<script>
+  const print = document.querySelector<HTMLButtonElement>('[data-print]');
+  if (print) {
+    print.hidden = false;
+    print.addEventListener('click', () => window.print());
+  }
+</script>
+
+<style>
+  /* On screen: a white A4 sheet on the 1350 parchment. In print: black on white. */
+  :global(.resume-page) {
+    color-scheme: light;
+
+    --ink: #111;
+    --rule: #c9c2b2;
+
+    background: #e9dfca;
+    color: var(--ink);
+    font-family: Inter, system-ui, sans-serif; /* the static weights only */
+  }
+
+  :global(html:has(.resume-page)) {
+    background: #e9dfca;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    width: min(210mm, 100% - 2rem);
+    margin: 1.5rem auto 1rem;
+    font-size: 0.9rem;
+  }
+
+  .toolbar a,
+  .tool {
+    color: #3b2a1a;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tool {
+    padding: 0.35rem 0.85rem;
+    border: 1px solid #b9a98a;
+    border-radius: 999px;
+    background: #f7f1e3;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .tool:hover {
+    background: #fff;
+  }
+
+  .sheet {
+    width: min(210mm, 100% - 2rem);
+    min-height: 297mm;
+    margin: 0 auto 3rem;
+    padding: 16mm;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(59 42 26 / 25%);
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.4;
+  }
+
+  .sheet a {
+    color: var(--ink);
+  }
+
+  h1 {
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 20pt;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .label {
+    margin-top: 2pt;
+  }
+
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 10pt;
+    margin-top: 3pt;
+    color: #333;
+  }
+
+  section {
+    margin-top: 10pt;
+  }
+
+  h2 {
+    margin-bottom: 6pt;
+    padding-bottom: 2pt;
+    border-bottom: 1px solid var(--rule);
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 10.5pt;
+    font-weight: 700;
+    letter-spacing: 0; /* spaced capitals extract as "E D U C AT I O N" */
+    text-transform: uppercase;
+  }
+
+  .entry + .entry {
+    margin-top: 6pt;
+  }
+
+  .entry-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12pt;
+  }
+
+  .dates {
+    flex: none;
+    color: #333;
+  }
+
+  .sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 10pt;
+    color: #333;
+  }
+
+  .entry ul {
+    padding-left: 12pt;
+    list-style: disc;
+  }
+
+  .skills div + div {
+    margin-top: 2pt;
+  }
+
+  .skills dt {
+    display: inline;
+    font-weight: 600;
+  }
+
+  .skills dd {
+    display: inline;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+
+  @media print {
+    :global(.resume-page) {
+      background: #fff;
+    }
+
+    .sheet {
+      width: auto;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+
+    :global(.email a) {
+      color: #000;
+    }
+  }
+
+  @media (width < 40rem) {
+    .sheet {
+      min-height: 0;
+      padding: 1.25rem;
+    }
+
+    .entry-head {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+</style>

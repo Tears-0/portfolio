@@ -12,6 +12,10 @@ export interface Markers {
 export function createMarkers(panel: HTMLElement): Markers {
   const readout = panel.querySelector<HTMLElement>('[data-markers-readout]');
   const now = panel.querySelector<HTMLElement>('[data-markers-now]');
+  for (const mark of panel.querySelectorAll<HTMLElement>('[data-top]')) {
+    mark.style.top = mark.dataset.top ?? '0';
+    if (mark.dataset.height) mark.style.height = mark.dataset.height;
+  }
 
   const read = () => {
     try {

@@ -45,6 +45,7 @@ const profile = defineCollection({
     headline: z.string(),
     pitch: z.string(),
     location: z.string(),
+    place: z.object({ region: z.string(), countryCode: z.string().length(2) }),
     availability: z.string(),
     targetRoles: z.array(z.string()),
     cards: z
@@ -110,4 +111,28 @@ const philosophy = defineCollection({
   }),
 });
 
-export const collections = { eras, profile, skills, projects, philosophy };
+const education = defineCollection({
+  loader: file('src/content/education.yaml'),
+  schema: z.object({
+    institution: z.string(),
+    location: z.string(),
+    degree: z.string(),
+    start: z.string(),
+    end: z.string(),
+    grade: z.string().optional(),
+    project: z.string().optional(),
+    units: z.array(z.string()).max(6).default([]),
+  }),
+});
+
+const publications = defineCollection({
+  loader: file('src/content/publications.yaml'),
+  schema: z.object({
+    title: z.string(),
+    status: z.enum(['In preparation', 'Submitted to RECOMB 2027', 'Under review', 'Accepted']),
+    project: reference('projects').optional(),
+    url: z.url().optional(),
+  }),
+});
+
+export const collections = { eras, profile, skills, projects, philosophy, education, publications };

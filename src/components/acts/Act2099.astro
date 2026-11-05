@@ -1,8 +1,14 @@
 ---
+// Act I · 2099 · The Ethereal Singularity. An obsidian canvas where the interface has
+// almost disappeared: frosted glass, iridescent edges, motion that feels anticipatory.
 import type { CollectionEntry } from 'astro:content';
+import '../../scenes/act-2099/act-2099.css';
+import { RESUME_PDF } from '../../lib/content';
+import { hasPlaceholder, publishText } from '../../lib/placeholder';
+import { seeded } from '../../scenes/geometry';
 import type { SceneDef } from '../../scenes/registry';
-import { hasPlaceholder } from '../../lib/placeholder';
 import Beat from '../Beat.astro';
+import Email from '../Email.astro';
 import SceneLayer from '../SceneLayer.astro';
 import TimeMachine from '../TimeMachine.astro';
 
@@ -11,29 +17,117 @@ interface Props {
   profile: CollectionEntry<'profile'>['data'];
 }
 const { scene, profile } = Astro.props;
+
+const words = profile.greeting.split(/\s+/);
+/** Three depths: far cards move less as they rise into place. */
+const DEPTHS = [0.55, 1, 0.8, 0.4];
+const cards = profile.cards.flatMap((card) => {
+  const value = publishText(card.value);
+  return value ? [{ ...card, value }] : [];
+});
+const availability = publishText(profile.availability);
+
+// I-4: pixel artefacts that creep in from the edges as Act I decays toward 1999.
+const random = seeded(2099);
+const pixels = Array.from({ length: 80 }, (_, i) => {
+  const side = i % 4;
+  const depth = random() * 60;
+  const along = random();
+  const size = 3 + Math.floor(random() * 5);
+  const x = side === 0 ? depth : side === 1 ? 960 - depth - size : along * 960;
+  const y = side === 2 ? depth : side === 3 ? 540 - depth - size : along * 540;
+  return { x: x.toFixed(0), y: y.toFixed(0), size, o: (0.3 + random() * 0.6).toFixed(2) };
+});
 ---
 
 <SceneLayer scene={scene} anchor="top">
+  <div class="a1-ambient" aria-hidden="true"></div>
+  <div class="a1-cursor" aria-hidden="true" data-a1-cursor></div>
+  <div class="a1-decay" aria-hidden="true" data-a1-decay>
+    <div class="a1-scanlines"></div>
+    <svg viewBox="0 0 960 540" preserveAspectRatio="xMidYMid slice">
+      {pixels.map((p) => (
+        <rect x={p.x} y={p.y} width={p.size} height={p.size} opacity={p.o} />
+      ))}
+    </svg>
+  </div>
+  <div class="a1-hud" aria-hidden="true" data-a1-hud>
+    <svg viewBox="0 0 64 64">
+      <circle class="a1-hud-ring" cx="32" cy="32" r="28" pathLength="100"></circle>
+      <circle class="a1-hud-ticks" cx="32" cy="32" r="23"></circle>
+    </svg>
+    <span data-a1-hud-year>2099.00</span>
+  </div>
+
   <Beat scene="act-2099" beat="prologue">
     <TimeMachine />
   </Beat>
+
   <Beat scene="act-2099" beat="greeting" id="greeting">
-    <p class="greeting">{profile.greeting}</p>
-    <h1 class="name" id="top-title" tabindex="-1">
-      {profile.displayName}
-    </h1>
-    <p class="headline">{profile.headline}</p>
+    <div class="a1-greeting-block" data-a1-greeting>
+      <p class="a1-greeting">
+        {words.map((word, i) => (
+          <>
+            <span class="word">{word}</span>
+            {i < words.length - 1 && ' '}
+          </>
+        ))}
+      </p>
+      <h1 class="a1-name" id="top-title" tabindex="-1">
+        {profile.displayName}
+      </h1>
+      <p class="a1-headline">{profile.headline}</p>
+    </div>
   </Beat>
+
   <Beat scene="act-2099" beat="identity">
-    <ul class="cards">
-      {profile.cards.map((card) => (
-        <li class="card">
-          <span class="card-label">{card.label}</span>
-          <span class:list={['card-value', { draft: hasPlaceholder(card.value) }]}>
-            {card.value}
-          </span>
+    <p class="a1-greeting-compact" aria-hidden="true">
+      {profile.greeting}
+    </p>
+    <ul class="a1-cards" data-a1-cards>
+      {cards.map((card, i) => (
+        <li class="a1-card" data-depth={DEPTHS[i] ?? 0.7}>
+          {card.label === 'Status' ? (
+            <button class="a1-card-inner" type="button" popovertarget="a1-status">
+              <span class="a1-card-label">{card.label}</span>
+              <span class:list={['a1-card-value', { draft: hasPlaceholder(card.value) }]}>
+                {card.value}
+              </span>
+              <span class="a1-card-more">Availability and resume</span>
+            </button>
+          ) : (
+            <div class="a1-card-inner">
+              <span class="a1-card-label">{card.label}</span>
+              <span class:list={['a1-card-value', { draft: hasPlaceholder(card.value) }]}>
+                {card.value}
+              </span>
+            </div>
+          )}
         </li>
       ))}
     </ul>
+    <div class="a1-sheet" id="a1-status" popover>
+      <p class="a1-card-label">Status</p>
+      <p class:list={['a1-sheet-lead', { draft: availability && hasPlaceholder(availability) }]}>
+        {availability ?? 'Open to graduate roles'}
+      </p>
+      <p>{profile.targetRoles.join(' · ')}</p>
+      <p>{profile.location}</p>
+      <p class="a1-sheet-links">
+        <a href="/resume">View resume</a>
+        <a href={RESUME_PDF} download>
+          Download PDF
+        </a>
+        <Email email={profile.links.email} />
+      </p>
+      <button
+        class="a1-sheet-close"
+        type="button"
+        popovertarget="a1-status"
+        popovertargetaction="hide"
+      >
+        Close
+      </button>
+    </div>
   </Beat>
 </SceneLayer>

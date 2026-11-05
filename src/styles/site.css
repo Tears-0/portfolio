@@ -1,0 +1,177 @@
+/* The static pages (home summary, resume, 404): Act I's palette and type, no animation
+   runtime. Every page prints black on white. */
+@layer reset, tokens, base, print;
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  p,
+  ul,
+  ol,
+  dl,
+  dd,
+  figure,
+  blockquote {
+    margin: 0;
+  }
+
+  ul,
+  ol {
+    padding: 0;
+    list-style: none;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+@layer tokens {
+  :root {
+    color-scheme: dark;
+
+    /* Act I · 2099 (spec palette, contrast checked against --bg) */
+    --bg: #07090d;
+    --glass: rgb(22 27 36 / 70%);
+    --glass-line: rgb(236 239 245 / 12%);
+    --text: #eceff5;
+    --muted: #9aa3b5;
+    --iris: #9fe7f5;
+    --iridescence: linear-gradient(110deg, #9fe7f5, #b9a6f5 45%, #f5dfa6);
+    --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
+    --font-text: 'Inter Variable', system-ui, sans-serif;
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-text);
+    font-size: 100%;
+    line-height: 1.6;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  a {
+    color: var(--iris);
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--iris);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .draft {
+    text-decoration: underline dashed #ff5a1f;
+    text-underline-offset: 0.2em;
+  }
+
+  .email-copy {
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--glass-line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.8em;
+    cursor: pointer;
+  }
+
+  .email-copy:hover {
+    color: var(--text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer print {
+  @media print {
+    :root {
+      color-scheme: light;
+
+      --bg: #fff;
+      --text: #000;
+      --muted: #333;
+      --iris: #000;
+      --glass: transparent;
+      --glass-line: #999;
+    }
+
+    html,
+    body {
+      background: #fff !important;
+      color: #000 !important;
+    }
+
+    a {
+      color: #000;
+      text-decoration: none;
+    }
+
+    /* External links print their address after the text. */
+    a[href^='http']:not([data-print-plain])::after {
+      content: ' (' attr(href) ')';
+      font-size: 0.85em;
+    }
+
+    .no-print,
+    .email-copy {
+      display: none !important;
+    }
+
+    section,
+    article,
+    li {
+      break-inside: avoid;
+    }
+  }
+}

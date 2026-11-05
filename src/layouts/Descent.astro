@@ -1,5 +1,9 @@
 ---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/space-grotesk';
 import '../styles/global.css';
+import { TOTAL_VH } from '../scenes/registry';
 
 interface Props {
   title: string;
@@ -16,10 +20,13 @@ const { title, description } = Astro.props;
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="color-scheme" content="dark" />
-    <script is:inline>
+    <meta name="robots" content="noindex" />
+    <script is:inline define:vars={{ totalVh: TOTAL_VH }}>
       // Pick the mode before first paint. "descent": pinned and scrubbed (desktop, motion
       // allowed). "stacked": acts one after another with crossfades (reduced motion, narrow
       // or touch-only screens). ?mode=stacked or ?mode=descent forces one for testing.
+      // The track's length is set here too: the Content-Security-Policy blocks style="…".
+      document.documentElement.style.setProperty('--total-vh', String(totalVh));
       (() => {
         const forced = new URLSearchParams(location.search).get('mode');
         const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;

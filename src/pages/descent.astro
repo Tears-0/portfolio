@@ -1,0 +1,49 @@
+---
+// The descent. Served at /descent (noindex) until launch (M7), when it replaces the static
+// page on desktop; until then the static summary at / is what everyone sees.
+import Act1350 from '../components/acts/Act1350.astro';
+import Act1888 from '../components/acts/Act1888.astro';
+import Act1999 from '../components/acts/Act1999.astro';
+import Act2099 from '../components/acts/Act2099.astro';
+import SceneLayer from '../components/SceneLayer.astro';
+import ScrollMarkers from '../components/ScrollMarkers.astro';
+import TimelineGauge from '../components/TimelineGauge.astro';
+import TimeMachineLoading from '../components/TimeMachineLoading.astro';
+import Descent from '../layouts/Descent.astro';
+import { getEras, getFeaturedProjects, getPhilosophy, getProfile, getSkills } from '../lib/content';
+import { SCENES, type SceneDef, type SceneId } from '../scenes/registry';
+
+const scene = (id: SceneId): SceneDef => SCENES.find((s) => s.id === id)!;
+
+const [eras, profile, philosophy, projects, skills] = await Promise.all([
+  getEras(),
+  getProfile(),
+  getPhilosophy(),
+  getFeaturedProjects(),
+  getSkills(),
+]);
+---
+
+<Descent
+  title={`${profile.displayName} · Four Eras`}
+  description={`${profile.name}: ${profile.pitch}`}
+>
+  <TimelineGauge eras={eras} />
+  <main class="track" data-track data-inert-while-travelling>
+    <div class="stage" data-stage>
+      <Act2099 scene={scene('act-2099')} profile={profile} />
+      <SceneLayer scene={scene('shatter')} />
+      <Act1999 scene={scene('act-1999')} projects={projects} />
+      <SceneLayer scene={scene('power-loss')} />
+      <Act1888 scene={scene('act-1888')} skills={skills} />
+      <SceneLayer scene={scene('rust-to-gold')} />
+      <Act1350 scene={scene('act-1350')} philosophy={philosophy} profile={profile} />
+    </div>
+  </main>
+  <TimeMachineLoading eras={eras} />
+  <ScrollMarkers />
+  <script>
+    import { start } from '../engine/descent';
+    start();
+  </script>
+</Descent>
