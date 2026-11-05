@@ -9,6 +9,7 @@ import SceneLayer from '../components/SceneLayer.astro';
 import ScrollMarkers from '../components/ScrollMarkers.astro';
 import TimelineGauge from '../components/TimelineGauge.astro';
 import TimeMachineLoading from '../components/TimeMachineLoading.astro';
+import TransitionShatter from '../components/TransitionShatter.astro';
 import Descent from '../layouts/Descent.astro';
 import { getEras, getFeaturedProjects, getPhilosophy, getProfile, getSkills } from '../lib/content';
 import { SCENES, type SceneDef, type SceneId } from '../scenes/registry';
@@ -32,8 +33,8 @@ const [eras, profile, philosophy, projects, skills] = await Promise.all([
   <main class="track" data-track data-inert-while-travelling>
     <div class="stage" data-stage>
       <Act2099 scene={scene('act-2099')} profile={profile} />
-      <SceneLayer scene={scene('shatter')} />
-      <Act1999 scene={scene('act-1999')} projects={projects} />
+      <TransitionShatter scene={scene('shatter')} />
+      <Act1999 scene={scene('act-1999')} projects={projects} profile={profile} />
       <SceneLayer scene={scene('power-loss')} />
       <Act1888 scene={scene('act-1888')} skills={skills} />
       <SceneLayer scene={scene('rust-to-gold')} />

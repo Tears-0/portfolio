@@ -1,6 +1,6 @@
 /* Four Eras · M1 grey box. Era colours come from the spec's palettes; everything else stays
    neutral until each act's milestone. Orange marks prototype annotations, as in the storyboard. */
-@layer reset, tokens, base, layout, components, prototype, act-2099;
+@layer reset, tokens, base, layout, components, prototype, scenes;
 
 @layer reset {
   *,

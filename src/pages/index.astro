@@ -7,6 +7,7 @@ import {
   RESUME_PDF,
   SITE_URL,
   STATUS_LABEL,
+  caseStudyReady,
   formatPeriod,
   getEducation,
   getFeaturedProjects,
@@ -106,6 +107,7 @@ const person = {
           const period = formatPeriod(data.period);
           const highlight = publishMetric(data.highlight);
           const links = [
+            caseStudyReady(project) && { href: `/projects/${project.id}`, label: 'Case study' },
             data.links.repo && { href: data.links.repo, label: 'Code' },
             data.links.paper && { href: data.links.paper, label: 'Paper' },
             data.links.demo && { href: data.links.demo, label: 'Demo' },

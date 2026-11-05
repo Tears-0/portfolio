@@ -1,91 +1,254 @@
 ---
+// Act II · 1999 · The Cybernet Grid. A cyber deck jacked into a neon data frontier:
+// phosphor on black, a grid horizon, a cartridge rack, bevelled windows and a console.
+import '@fontsource-variable/noto-sans';
+import '@fontsource-variable/pixelify-sans';
+import '@fontsource/vt323';
 import type { CollectionEntry } from 'astro:content';
+import '../../scenes/act-1999/act-1999.css';
+import benchmarkCsv from '../../data/benchmark.csv?raw';
+import { parseBenchmark } from '../../lib/benchmark';
+import { STATUS_LABEL, caseStudyReady, formatPeriod } from '../../lib/content';
+import { SHOW_DRAFTS, hasPlaceholder, publishMetric, publishText } from '../../lib/placeholder';
+import { SUGGESTED, runCommand, type CliData } from '../../scenes/act-1999/cli';
 import type { SceneDef } from '../../scenes/registry';
-import { STATUS_LABEL, formatPeriod } from '../../lib/content';
-import { hasPlaceholder, publishMetric, publishText } from '../../lib/placeholder';
+import BenchmarkChart from '../BenchmarkChart.astro';
 import Beat from '../Beat.astro';
+import GridHorizon from '../GridHorizon.astro';
 import SceneLayer from '../SceneLayer.astro';
 
 interface Props {
   scene: SceneDef;
   /** Featured projects in order; the scroll map has one rest point for each of the first four. */
   projects: CollectionEntry<'projects'>[];
+  profile: CollectionEntry<'profile'>['data'];
 }
-const { scene, projects } = Astro.props;
-const COMMANDS = ['ls projects', 'run cartridge_02.exe', 'stats quantization', 'help'];
+const { scene, projects, profile } = Astro.props;
+
+const shown = projects.slice(0, 4).map((project, i) => {
+  const beat = scene.beats.find((b) => b.id === `project-${i + 1}`);
+  return {
+    project,
+    n: i + 1,
+    file: `cartridge_0${i + 1}.exe`,
+    rest: beat?.rest ?? scene.from,
+    role: publishText(project.data.role),
+    period: formatPeriod(project.data.period),
+    highlight: publishMetric(project.data.highlight),
+    caseStudy: caseStudyReady(project),
+  };
+});
+
+const benchmark = parseBenchmark(benchmarkCsv);
+
+// The console answers from the same data (spec: CLI answers come from data).
+const cliData: CliData = {
+  name: profile.displayName,
+  headline: profile.headline,
+  projects: shown.map((s) => ({
+    cartridge: s.file,
+    label: s.project.data.cartridge,
+    slug: s.project.id,
+    title: s.project.data.title,
+    summary: s.project.data.summary,
+    stack: s.project.data.tags,
+    status: STATUS_LABEL[s.project.data.status],
+    highlight: s.highlight,
+    facts: s.project.data.cli.flatMap((fact) => publishText(fact) ?? []),
+  })),
+  benchmark,
+};
+// "<" escaped so no string in the data can close the script element early.
+const cliJson = JSON.stringify(cliData).replace(/</g, '\\u003c');
+const consoleRest = scene.beats.find((b) => b.id === 'console')?.rest ?? scene.to;
+// What the screen shows before anyone types (and all that shows without JavaScript).
+const bootLines = [
+  'CYBERGRID DECK v1.999 · type help, or pick a command below',
+  '> ls projects',
+  ...runCommand('ls projects', cliData).lines,
+];
 ---
 
 <SceneLayer scene={scene} anchor="works" heading="1999 · Works">
-  {projects.slice(0, 4).map((project, i) => {
-    const { data } = project;
-    const role = publishText(data.role);
-    const period = formatPeriod(data.period);
-    const highlight = publishMetric(data.highlight);
+  <GridHorizon />
+  <div class="a2-crt" aria-hidden="true"></div>
+  <div class="a2-flicker" aria-hidden="true" data-a2-flicker></div>
+
+  <nav class="a2-rack" aria-label="Cartridges" data-a2-rack>
+    <p class="a2-rack-label" aria-hidden="true">
+      RACK
+    </p>
+    <ol>
+      {shown.map((s) => (
+        <li>
+          <a class="a2-cart" href={`#project-${s.project.id}`} data-cart={s.n}>
+            <span class="a2-cart-label" aria-hidden="true">
+              {s.project.data.cartridge}
+            </span>
+            <span class="a2-cart-num" aria-hidden="true">
+              0{s.n}
+            </span>
+            <span class="visually-hidden">{s.project.data.title}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  {shown.map((s) => {
+    const { data } = s.project;
+    const isBenchmark = s.project.id === 'quantization-benchmark';
     return (
-      <Beat scene="act-1999" beat={`project-${i + 1}`}>
-        <article class="window" aria-labelledby={`project-${project.id}`}>
-          <p class="window-bar" aria-hidden="true">
-            cartridge_0{i + 1}.exe · {data.cartridge}
-          </p>
-          <h3 id={`project-${project.id}`}>{data.title}</h3>
-          <p class="summary">{data.summary}</p>
-          <dl class="meta">
-            {role && (
+      <Beat scene="act-1999" beat={`project-${s.n}`}>
+        <article
+          class="a2-window"
+          id={`project-${s.project.id}`}
+          aria-labelledby={`title-${s.project.id}`}
+          tabindex="-1"
+          data-rest={s.rest}
+        >
+          <header class="a2-titlebar">
+            <span class="a2-titlebar-text" aria-hidden="true">
+              {s.file} · {data.cartridge}
+            </span>
+            <span class="a2-glyphs" aria-hidden="true">
+              <span class="a2-glyph g-min" />
+              <span class="a2-glyph g-max" />
+            </span>
+            <button
+              class="a2-glyph g-close"
+              type="button"
+              data-next
+              aria-label="Close window and continue"
+            />
+          </header>
+          <div class="a2-pane">
+            <h3 id={`title-${s.project.id}`}>{data.title}</h3>
+            <p class="a2-summary">{data.summary}</p>
+            <dl class="a2-meta">
+              {s.role && (
+                <div>
+                  <dt>Role</dt>
+                  <dd class:list={{ draft: hasPlaceholder(s.role) }}>{s.role}</dd>
+                </div>
+              )}
+              {s.period && (
+                <div>
+                  <dt>Period</dt>
+                  <dd class:list={{ draft: hasPlaceholder(s.period) }}>{s.period}</dd>
+                </div>
+              )}
               <div>
-                <dt>Role</dt>
-                <dd class:list={{ draft: hasPlaceholder(role) }}>{role}</dd>
+                <dt>Status</dt>
+                <dd>{STATUS_LABEL[data.status]}</dd>
               </div>
+            </dl>
+            <ul class="a2-tags" aria-label="Tags">
+              {data.tags.map((tag) => (
+                <li>{tag}</li>
+              ))}
+            </ul>
+            {s.highlight && (
+              <p class="a2-highlight">
+                <strong class:list={{ draft: hasPlaceholder(s.highlight.value) }}>
+                  {s.highlight.value}
+                </strong>
+                <span>{s.highlight.label}</span>
+                <span class:list={['a2-source', { draft: hasPlaceholder(s.highlight.source) }]}>
+                  Source: {s.highlight.source}
+                </span>
+              </p>
             )}
-            {period && (
-              <div>
-                <dt>Period</dt>
-                <dd class:list={{ draft: hasPlaceholder(period) }}>{period}</dd>
-              </div>
+            {isBenchmark && <BenchmarkChart rows={benchmark} class="a2-chart" />}
+            {isBenchmark && benchmark.length === 0 && SHOW_DRAFTS && (
+              <p class="a2-chart a2-chart-empty draft">
+                Chart: results pending (src/data/benchmark.csv)
+              </p>
             )}
-            <div>
-              <dt>Status</dt>
-              <dd>{STATUS_LABEL[data.status]}</dd>
-            </div>
-          </dl>
-          <ul class="tags" aria-label="Tags">
-            {data.tags.map((tag) => (
-              <li>{tag}</li>
-            ))}
-          </ul>
-          {highlight && (
-            <p class="highlight">
-              <strong class:list={{ draft: hasPlaceholder(highlight.value) }}>
-                {highlight.value}
-              </strong>
-              <span>{highlight.label}</span>
-              <span class:list={['source', { draft: hasPlaceholder(highlight.source) }]}>
-                Source: {highlight.source}
-              </span>
-            </p>
-          )}
-          <p class="window-actions">
-            <span class="gb-button">Open case study · M3</span>
-            {data.links.repo && <a href={data.links.repo}>Code</a>}
-            {data.links.paper && <a href={data.links.paper}>Paper</a>}
-          </p>
+            {(s.caseStudy || data.links.repo || data.links.paper) && (
+              <p class="a2-actions">
+                {s.caseStudy && (
+                  <a class="a2-btn" href={`/projects/${s.project.id}`}>
+                    Open case study
+                  </a>
+                )}
+                {data.links.repo && (
+                  <a class="a2-btn" href={data.links.repo}>
+                    Code
+                  </a>
+                )}
+                {data.links.paper && (
+                  <a class="a2-btn" href={data.links.paper}>
+                    Paper
+                  </a>
+                )}
+              </p>
+            )}
+          </div>
         </article>
       </Beat>
     );
   })}
+
   <Beat scene="act-1999" beat="console">
-    <div class="panel console">
-      <h3>Console</h3>
-      <p>Free typing plus suggested commands, with answers generated from the content data.</p>
-      <ul class="chips" aria-label="Suggested commands">
-        {COMMANDS.map((command) => (
+    <section
+      class="a2-window a2-console"
+      id="console"
+      aria-labelledby="console-title"
+      tabindex="-1"
+      data-rest={consoleRest}
+      data-cli
+    >
+      <header class="a2-titlebar">
+        <h3 class="a2-titlebar-text" id="console-title">
+          terminal · cy@cybergrid
+        </h3>
+        <button class="a2-skip" type="button" data-next>
+          Skip ↓
+        </button>
+      </header>
+      <div class="a2-term">
+        <div class="a2-screen" data-cli-screen>
+          {bootLines.map((line) => (
+            <p>{line}</p>
+          ))}
+        </div>
+        <p class="visually-hidden" role="status" aria-live="polite" data-cli-live></p>
+        <form class="a2-prompt" data-cli-form>
+          <label class="a2-ps1" for="cli-input">
+            cy@cybergrid:~$
+          </label>
+          <input
+            id="cli-input"
+            name="command"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            data-allow-paging
+          />
+        </form>
+      </div>
+      <ul class="a2-chips" aria-label="Suggested commands">
+        {SUGGESTED.map((command) => (
           <li>
-            <code>{command}</code>
+            <button type="button" data-cli-run={command}>
+              {command}
+            </button>
           </li>
         ))}
       </ul>
-      <p class="gb-note" aria-hidden="true">
-        Grey box until M3
-      </p>
-    </div>
+      <script is:inline type="application/json" id="cli-data" set:html={cliJson} />
+    </section>
   </Beat>
 </SceneLayer>
+
+<script>
+  // The console works in both modes; its controller loads once the page is idle.
+  const root = document.querySelector<HTMLElement>('[data-cli]');
+  if (root) {
+    const load = () =>
+      import('../../scenes/act-1999/console').then(({ mountConsole }) => mountConsole(root));
+    if ('requestIdleCallback' in window) requestIdleCallback(() => void load(), { timeout: 2500 });
+    else setTimeout(() => void load(), 800);
+  }
+</script>

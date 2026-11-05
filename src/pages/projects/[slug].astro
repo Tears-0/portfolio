@@ -1,0 +1,450 @@
+---
+// A case study per featured project, opened from Act II and the static page: styled as a
+// 1999 window but built for reading (Noto Sans body, pixel type only for titles and labels),
+// and printable. Production links to it, and lets search engines index it, only once its
+// body is written; until then the page shows the project card and says the write-up is due.
+import '@fontsource-variable/noto-sans';
+import '@fontsource-variable/pixelify-sans';
+import '@fontsource/vt323';
+import { render } from 'astro:content';
+import BenchmarkChart from '../../components/BenchmarkChart.astro';
+import benchmarkCsv from '../../data/benchmark.csv?raw';
+import Site from '../../layouts/Site.astro';
+import { parseBenchmark } from '../../lib/benchmark';
+import {
+  STATUS_LABEL,
+  caseStudyReady,
+  formatPeriod,
+  getFeaturedProjects,
+  getProfile,
+} from '../../lib/content';
+import { hasPlaceholder, publishMetric, publishText } from '../../lib/placeholder';
+
+export async function getStaticPaths() {
+  const projects = await getFeaturedProjects();
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, n: i + 1 },
+  }));
+}
+
+const { project, n } = Astro.props;
+const { data } = project;
+const profile = await getProfile();
+const ready = caseStudyReady(project);
+const { Content } = await render(project);
+const role = publishText(data.role);
+const period = formatPeriod(data.period);
+const highlight = publishMetric(data.highlight);
+const benchmark = project.id === 'quantization-benchmark' ? parseBenchmark(benchmarkCsv) : [];
+const links = [
+  data.links.repo && { href: data.links.repo, label: 'Code' },
+  data.links.paper && { href: data.links.paper, label: 'Paper' },
+  data.links.demo && { href: data.links.demo, label: 'Demo' },
+].filter(Boolean) as { href: string; label: string }[];
+---
+
+<Site
+  title={`${data.title} · ${profile.displayName}`}
+  description={data.summary}
+  noindex={!ready}
+  class="cs"
+>
+  <main class="cs-wrap">
+    <article class="cs-window" aria-labelledby="cs-title">
+      <header class="cs-titlebar">
+        <span class="cs-titlebar-text" aria-hidden="true">
+          cartridge_0{n}.exe · {data.cartridge}
+        </span>
+        <a class="cs-close" href="/#work-title" data-cs-close>
+          <span class="visually-hidden">Close the case study</span>
+        </a>
+      </header>
+      <div class="cs-pane">
+        <p class="cs-kicker">Case study</p>
+        <h1 id="cs-title">{data.title}</h1>
+        <p class="cs-summary">{data.summary}</p>
+        <dl class="cs-meta">
+          {role && (
+            <div>
+              <dt>Role</dt>
+              <dd class:list={{ draft: hasPlaceholder(role) }}>{role}</dd>
+            </div>
+          )}
+          {period && (
+            <div>
+              <dt>Period</dt>
+              <dd class:list={{ draft: hasPlaceholder(period) }}>{period}</dd>
+            </div>
+          )}
+          <div>
+            <dt>Status</dt>
+            <dd>{STATUS_LABEL[data.status]}</dd>
+          </div>
+        </dl>
+        <ul class="cs-tags" aria-label="Tags">
+          {data.tags.map((tag) => (
+            <li>{tag}</li>
+          ))}
+        </ul>
+        {highlight && (
+          <p class="cs-highlight">
+            <strong class:list={{ draft: hasPlaceholder(highlight.value) }}>
+              {highlight.value}
+            </strong>
+            <span>{highlight.label}</span>
+            <span class:list={['cs-source', { draft: hasPlaceholder(highlight.source) }]}>
+              Source: {highlight.source}
+            </span>
+          </p>
+        )}
+        {ready ? (
+          <div class="cs-body">
+            <Content />
+          </div>
+        ) : (
+          <p class="cs-pending">The full write-up is on its way.</p>
+        )}
+        <BenchmarkChart rows={benchmark} class="cs-chart" />
+        {links.length > 0 && (
+          <p class="cs-links">
+            {links.map((link) => (
+              <a href={link.href}>{link.label}</a>
+            ))}
+          </p>
+        )}
+      </div>
+    </article>
+    <nav class="cs-nav no-print" aria-label="Site">
+      <a href="/">{profile.displayName} · home</a>
+      <a href="/resume">Resume</a>
+    </nav>
+  </main>
+</Site>
+
+<script>
+  // Close goes back to where the visitor came from (the descent or the static page) when it
+  // was this site; otherwise the link's own target, the static page's work section.
+  const fromThisSite = () => {
+    try {
+      return new URL(document.referrer).origin === location.origin;
+    } catch {
+      return false; // no referrer
+    }
+  };
+  const close = document.querySelector<HTMLAnchorElement>('[data-cs-close]');
+  close?.addEventListener('click', (e) => {
+    if (fromThisSite() && history.length > 1) {
+      e.preventDefault();
+      history.back();
+    }
+  });
+</script>
+
+<style>
+  :global(body.cs) {
+    --cs-bg: #05080a;
+    --cs-window: #0b1410;
+    --cs-text: #c8ffd9;
+    --cs-phosphor: #39ff7a;
+    --cs-dim: #1fa855;
+    --cs-cyan: #38e8ff;
+    --cs-magenta: #ff3ec9;
+    --cs-amber: #ffb000;
+    --cs-hi: #2c5c3d;
+    --cs-lo: #010302;
+    --cs-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
+    --cs-term: 'VT323', ui-monospace, monospace;
+    --cs-sans: 'Noto Sans Variable', verdana, sans-serif;
+
+    background: var(--cs-bg);
+    color: var(--cs-text);
+    font-family: var(--cs-sans);
+  }
+
+  :global(body.cs a) {
+    color: var(--cs-cyan);
+  }
+
+  :global(body.cs :focus-visible) {
+    outline: 2px solid var(--cs-amber);
+    outline-offset: 2px;
+  }
+
+  .cs-wrap {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: center;
+    padding: clamp(1rem, 4vw, 3.5rem) clamp(0.75rem, 3vw, 2rem) 3rem;
+  }
+
+  .cs-window {
+    width: min(48rem, 100%);
+    padding: 5px;
+    background: repeating-conic-gradient(var(--cs-dim) 0 25%, var(--cs-bg) 0 50%) 0 0 / 4px 4px;
+    border: 2px solid;
+    border-color: var(--cs-hi) var(--cs-lo) var(--cs-lo) var(--cs-hi);
+    box-shadow: 0 0 28px rgb(57 255 122 / 12%);
+  }
+
+  .cs-titlebar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.2rem 0.3rem 0.2rem 0.65rem;
+    color: var(--cs-bg);
+    background: linear-gradient(90deg, var(--cs-phosphor), var(--cs-dim));
+  }
+
+  .cs-titlebar-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-family: var(--cs-pixel);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cs-close {
+    position: relative;
+    flex: none;
+    width: 1.5rem;
+    height: 1.35rem;
+    background: #b9e6c6;
+    border: 2px solid;
+    border-color: #eafff0 #4c7a5b #4c7a5b #eafff0;
+  }
+
+  .cs-close::before,
+  .cs-close::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.8rem;
+    height: 2px;
+    background: var(--cs-bg);
+    content: '';
+    translate: -50% -50%;
+    rotate: 45deg;
+  }
+
+  .cs-close::after {
+    rotate: -45deg;
+  }
+
+  .cs-pane {
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    background: var(--cs-window);
+    border: 2px solid;
+    border-color: var(--cs-lo) var(--cs-hi) var(--cs-hi) var(--cs-lo);
+  }
+
+  .cs-kicker,
+  .cs-meta dt {
+    font-family: var(--cs-pixel);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: var(--cs-dim);
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: var(--cs-pixel);
+    font-size: clamp(1.7rem, 1.2rem + 2vw, 2.5rem);
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--cs-phosphor);
+    text-shadow:
+      -1px 0 rgb(255 62 201 / 45%),
+      1px 0 rgb(56 232 255 / 45%);
+  }
+
+  .cs-summary {
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  .cs-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 2rem;
+  }
+
+  .cs-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cs-tags li {
+    padding: 0.05rem 0.5rem;
+    font-family: var(--cs-term);
+    font-size: 1.1rem;
+    color: var(--cs-phosphor);
+    border: 1px solid var(--cs-dim);
+  }
+
+  .cs-highlight,
+  .cs-chart {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.7rem 0.9rem;
+    background: #030705;
+    border-left: 3px solid var(--cs-magenta);
+  }
+
+  .cs-highlight strong {
+    font-family: var(--cs-term);
+    font-size: 1.7rem;
+    font-weight: 400;
+    color: var(--cs-phosphor);
+  }
+
+  .cs-source,
+  .cs-chart :global(.bm-source) {
+    font-size: 0.8rem;
+    color: #9ad8ae;
+  }
+
+  .cs-chart :global(svg) {
+    width: 100%;
+    max-width: 32rem;
+  }
+
+  .cs-chart :global(text) {
+    font-family: var(--cs-term);
+    font-size: 15px;
+    fill: var(--cs-text);
+  }
+
+  .cs-chart :global(rect) {
+    fill: var(--cs-phosphor);
+  }
+
+  /* The write-up itself: a comfortable measure, plain type. */
+  .cs-body {
+    max-width: 40rem;
+    font-size: 1.02rem;
+    line-height: 1.7;
+  }
+
+  .cs-body :global(h2) {
+    margin: 1.8rem 0 0.5rem;
+    font-family: var(--cs-pixel);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--cs-phosphor);
+  }
+
+  .cs-body :global(p),
+  .cs-body :global(ul),
+  .cs-body :global(ol) {
+    margin: 0 0 0.9rem;
+  }
+
+  .cs-body :global(ul),
+  .cs-body :global(ol) {
+    padding-left: 1.3rem;
+  }
+
+  .cs-body :global(code) {
+    padding: 0 0.25rem;
+    font-family: var(--cs-term);
+    font-size: 1.1em;
+    color: var(--cs-phosphor);
+    background: #030705;
+  }
+
+  .cs-pending {
+    font-family: var(--cs-term);
+    font-size: 1.25rem;
+    color: var(--cs-phosphor);
+  }
+
+  .cs-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .cs-links a {
+    padding: 0.3rem 0.9rem;
+    font-family: var(--cs-pixel);
+    font-size: 0.9rem;
+    text-decoration: none;
+    background: #10201a;
+    border: 2px solid;
+    border-color: var(--cs-hi) var(--cs-lo) var(--cs-lo) var(--cs-hi);
+  }
+
+  .cs-nav {
+    display: flex;
+    gap: 1.5rem;
+    font-family: var(--cs-pixel);
+    font-size: 0.9rem;
+  }
+
+  @media print {
+    :global(body.cs) {
+      color: #000;
+      background: #fff;
+    }
+
+    .cs-wrap {
+      padding: 0;
+    }
+
+    .cs-window,
+    .cs-pane,
+    .cs-highlight,
+    .cs-chart {
+      padding: 0;
+      background: none;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .cs-titlebar,
+    .cs-nav {
+      display: none;
+    }
+
+    h1,
+    .cs-body :global(h2),
+    .cs-tags li,
+    .cs-highlight strong,
+    .cs-pending,
+    .cs-body :global(code) {
+      color: #000;
+      text-shadow: none;
+      background: none;
+    }
+
+    .cs-kicker,
+    .cs-meta dt,
+    .cs-source,
+    .cs-chart :global(.bm-source) {
+      color: #333;
+    }
+
+    .cs-tags li {
+      border-color: #999;
+    }
+
+    .cs-chart :global(text) {
+      fill: #000;
+    }
+
+    .cs-chart :global(rect) {
+      fill: #333;
+    }
+  }
+</style>

@@ -1,0 +1,59 @@
+---
+// The quantization results as a hand-rolled bar chart (spec: charts are SVG from the benchmark
+// CSV, no chart library). Renders nothing until src/data/benchmark.csv has rows. Screen
+// readers get the same numbers as a table; the figure's parent styles it for its era.
+import type { BenchmarkRow } from '../lib/benchmark';
+
+interface Props {
+  rows: readonly BenchmarkRow[];
+  class?: string;
+}
+const { rows, class: className } = Astro.props;
+const ROW = 22;
+const max = Math.max(...rows.map((r) => r.klDivergence), 0.0001);
+const bar = (r: BenchmarkRow) => Math.max(2, (r.klDivergence / max) * 190);
+const sources = [...new Set(rows.map((r) => r.source))].join('; ');
+---
+
+{rows.length > 0 && (
+  <figure class:list={['bm-chart', className]}>
+    <figcaption>KL divergence against FP16 (lower is closer to the original)</figcaption>
+    <svg viewBox={`0 0 320 ${rows.length * ROW + 8}`} aria-hidden="true">
+      {rows.map((r, i) => (
+        <g>
+          <text x="0" y={i * ROW + 18}>
+            {r.format}
+          </text>
+          <rect x="88" y={i * ROW + 6} width={bar(r)} height="14" />
+          <text x={bar(r) + 94} y={i * ROW + 18}>
+            {r.klDivergence}
+          </text>
+        </g>
+      ))}
+    </svg>
+    <table class="visually-hidden">
+      <caption>Quantization benchmark results</caption>
+      <thead>
+        <tr>
+          <th scope="col">Format</th>
+          <th scope="col">KL divergence against FP16</th>
+          <th scope="col">Tokens per second</th>
+          <th scope="col">VRAM (GB)</th>
+          <th scope="col">Power (W)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr>
+            <th scope="row">{r.format}</th>
+            <td>{r.klDivergence}</td>
+            <td>{r.tokensPerSecond}</td>
+            <td>{r.vramGb}</td>
+            <td>{r.powerW}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="bm-source">Source: {sources}</p>
+  </figure>
+)}

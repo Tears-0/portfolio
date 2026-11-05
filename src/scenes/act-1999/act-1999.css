@@ -1,0 +1,675 @@
+/* Act II · 1999 · The Cybernet Grid. Palette and type from the spec: phosphor on black,
+   bevelled windows, a glowing terminal. Snappy 0–150 ms UI with steps() motion; nothing
+   blinks more than twice a second or flashes more than three times a second. Long text
+   uses --a2-text on panes, never pure neon; pixel fonts are for titles and labels only. */
+
+/* The same order as global.css: whichever file loads first sets it, so act styles always win. */
+@layer reset, tokens, base, layout, components, prototype, scenes;
+
+@layer scenes {
+  [data-scene='act-1999'] {
+    --a2-bg: #05080a;
+    --a2-window: #0b1410;
+    --a2-term-bg: #030705;
+    --a2-text: #c8ffd9;
+    --a2-phosphor: #39ff7a;
+    --a2-dim: #1fa855;
+    --a2-cyan: #38e8ff;
+    --a2-magenta: #ff3ec9;
+    --a2-amber: #ffb000;
+    --a2-hi: #2c5c3d; /* bevel highlight */
+    --a2-lo: #010302; /* bevel shadow */
+    --a2-ease: steps(3, end);
+
+    /* Until the act goes live in the descent, system fallbacks: the pixel fonts download only
+       when the act is about to show, not with Act I. */
+    --a2-term: ui-monospace, 'Cascadia Code', consolas, monospace;
+    --a2-pixel: ui-monospace, 'Cascadia Code', consolas, monospace;
+    --a2-sans: verdana, system-ui, sans-serif;
+
+    color: var(--a2-text);
+    font-family: var(--a2-sans);
+    background: var(--a2-bg);
+  }
+
+  html:not([data-mode='descent']) [data-scene='act-1999'],
+  [data-scene='act-1999'].is-live {
+    --a2-term: 'VT323', ui-monospace, monospace;
+    --a2-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
+    --a2-sans: 'Noto Sans Variable', verdana, sans-serif;
+  }
+
+  [data-scene='act-1999'] ::selection {
+    background: var(--a2-cyan);
+    color: var(--a2-bg);
+  }
+
+  [data-scene='act-1999'] :focus-visible:not([tabindex='-1']) {
+    outline: 2px solid var(--a2-amber);
+    outline-offset: 2px;
+  }
+
+  [data-scene='act-1999'] a {
+    color: var(--a2-cyan);
+  }
+
+  /* Act II is built for real: the grey-box labels retire here. */
+  [data-scene='act-1999'] .gb-tag,
+  [data-scene='act-1999'] .gb-progress {
+    display: none;
+  }
+
+  [data-scene='act-1999'] .act-title {
+    font-family: var(--a2-pixel);
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--a2-phosphor);
+    text-transform: uppercase;
+  }
+
+  /* Windows sit above the grid horizon, below the CRT glass. (The grid, the rack and the CRT
+     share .beats with them, which stays unpositioned so the descent sizes them to the screen.) */
+  [data-scene='act-1999'] .beat {
+    z-index: 2;
+  }
+
+  html:not([data-mode='descent']) [data-scene='act-1999'] .beat {
+    position: relative;
+  }
+
+  /* ── CRT: scanlines over everything, a vignette in the descent ─────────── */
+
+  .a2-crt {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 22%) 0 1px, transparent 1px 3px);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  /* In the descent the whole screen is the CRT: curved corners, as the shatter left it. */
+  html[data-mode='descent'] .a2-crt {
+    inset: 1.2vmin;
+    border-radius: 3vmin / 4.5vmin;
+    background:
+      radial-gradient(120% 95% at 50% 50%, transparent 62%, rgb(0 0 0 / 55%) 100%),
+      repeating-linear-gradient(to bottom, rgb(0 0 0 / 22%) 0 1px, transparent 1px 3px);
+    box-shadow: 0 0 0 100vmax #000;
+    opacity: 1;
+  }
+
+  /* Exit hint: the picture dims and flickers as if losing power (low amplitude, < 2 a second). */
+  .a2-flicker {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .a2-flicker::after {
+    position: absolute;
+    inset: 0;
+    background: rgb(200 255 217 / 7%);
+    opacity: 0;
+    content: '';
+  }
+
+  .is-flickering .a2-flicker::after {
+    animation: a2-flicker 1.3s steps(1, end) infinite;
+  }
+
+  @keyframes a2-flicker {
+    0%,
+    100% {
+      opacity: 0;
+    }
+
+    38% {
+      opacity: 1;
+    }
+
+    44% {
+      opacity: 0;
+    }
+
+    81% {
+      opacity: 0.6;
+    }
+
+    86% {
+      opacity: 0;
+    }
+  }
+
+  /* ── The grid horizon behind the act ───────────────────────────────────── */
+
+  html:not([data-mode='descent']) [data-scene='act-1999'] .grid-horizon {
+    inset: auto 0 0;
+    height: min(45vh, 26rem);
+  }
+
+  /* ── Cartridge rack ────────────────────────────────────────────────────── */
+
+  .a2-rack {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-block: 1.5rem 0.5rem;
+  }
+
+  .a2-rack ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .a2-rack-label {
+    font-family: var(--a2-pixel);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--a2-dim);
+  }
+
+  .a2-cart {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.6rem;
+    align-items: center;
+    width: 10.5rem;
+    padding: 0.45rem 0.55rem 0.45rem 0.45rem;
+    font-family: var(--a2-pixel);
+    color: var(--a2-bg);
+    text-decoration: none;
+    background: linear-gradient(to bottom, #263028, #161d18);
+    border: 2px solid;
+    border-color: #3d4a40 var(--a2-lo) var(--a2-lo) #3d4a40;
+    transition:
+      translate 150ms var(--a2-ease),
+      box-shadow 150ms var(--a2-ease);
+  }
+
+  .a2-cart-label {
+    padding: 0.2rem 0.4rem;
+    color: var(--a2-bg);
+    overflow: hidden;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    background: var(--a2-amber);
+    border-bottom: 2px solid #b37b00;
+  }
+
+  /* The number sits behind grip ridges on the cartridge's spine. */
+  .a2-cart-num {
+    padding-left: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--a2-dim);
+    background: repeating-linear-gradient(to bottom, #0b100c 0 2px, transparent 2px 4px) left /
+      0.3rem 100% no-repeat;
+  }
+
+  .a2-cart:hover,
+  .a2-cart:focus-visible,
+  [data-active='1'] .a2-cart[data-cart='1'],
+  [data-active='2'] .a2-cart[data-cart='2'],
+  [data-active='3'] .a2-cart[data-cart='3'],
+  [data-active='4'] .a2-cart[data-cart='4'] {
+    box-shadow:
+      0 0 0 1px var(--a2-amber),
+      0 0 18px rgb(255 176 0 / 30%);
+  }
+
+  [data-active='1'] .a2-cart[data-cart='1'],
+  [data-active='2'] .a2-cart[data-cart='2'],
+  [data-active='3'] .a2-cart[data-cart='3'],
+  [data-active='4'] .a2-cart[data-cart='4'] {
+    translate: 1.1rem 0;
+  }
+
+  [data-active='1'] .a2-cart[data-cart='1'] .a2-cart-num,
+  [data-active='2'] .a2-cart[data-cart='2'] .a2-cart-num,
+  [data-active='3'] .a2-cart[data-cart='3'] .a2-cart-num,
+  [data-active='4'] .a2-cart[data-cart='4'] .a2-cart-num {
+    color: var(--a2-phosphor);
+  }
+
+  /* ── Bevelled windows ──────────────────────────────────────────────────── */
+
+  .a2-window {
+    width: min(44rem, 100%);
+    padding: 5px;
+
+    /* The dithered border: a 2 px checkerboard, the way a 1999 screen faked a mid-tone. */
+    background: repeating-conic-gradient(var(--a2-dim) 0 25%, var(--a2-bg) 0 50%) 0 0 / 4px 4px;
+    border: 2px solid;
+    border-color: var(--a2-hi) var(--a2-lo) var(--a2-lo) var(--a2-hi);
+    box-shadow:
+      0 0 0 1px #000,
+      0 0 28px rgb(57 255 122 / 12%);
+  }
+
+  .a2-titlebar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    min-height: 1.9rem;
+    padding: 0.2rem 0.25rem 0.2rem 0.6rem;
+    color: var(--a2-bg);
+    background: linear-gradient(90deg, var(--a2-phosphor), var(--a2-dim));
+  }
+
+  .a2-titlebar-text {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-family: var(--a2-pixel);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .a2-glyphs {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .a2-glyph {
+    position: relative;
+    display: block;
+    width: 1.3rem;
+    height: 1.2rem;
+    padding: 0;
+    color: var(--a2-bg);
+    background: #b9e6c6;
+    border: 2px solid;
+    border-color: #eafff0 #4c7a5b #4c7a5b #eafff0;
+  }
+
+  .a2-glyph::before,
+  .a2-glyph::after {
+    position: absolute;
+    content: '';
+  }
+
+  .g-min::before {
+    right: 3px;
+    bottom: 3px;
+    left: 3px;
+    height: 2px;
+    background: currentcolor;
+  }
+
+  .g-max::before {
+    inset: 2px 3px 3px;
+    border: 1px solid currentcolor;
+    border-top-width: 2px;
+  }
+
+  .g-close {
+    cursor: pointer;
+  }
+
+  .g-close::before,
+  .g-close::after {
+    top: 50%;
+    left: 50%;
+    width: 0.75rem;
+    height: 2px;
+    background: currentcolor;
+    translate: -50% -50%;
+    rotate: 45deg;
+  }
+
+  .g-close::after {
+    rotate: -45deg;
+  }
+
+  .g-close:active {
+    border-color: #4c7a5b #eafff0 #eafff0 #4c7a5b;
+  }
+
+  .a2-pane {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1.25rem 1.5rem 1.4rem;
+    background: var(--a2-window);
+    border: 2px solid;
+    border-color: var(--a2-lo) var(--a2-hi) var(--a2-hi) var(--a2-lo);
+  }
+
+  .a2-pane h3 {
+    margin: 0;
+    font-family: var(--a2-pixel);
+    font-size: clamp(1.35rem, 1.1rem + 1vw, 1.85rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--a2-phosphor);
+
+    /* Slight RGB fringing, on headings only. */
+    text-shadow:
+      -1px 0 rgb(255 62 201 / 45%),
+      1px 0 rgb(56 232 255 / 45%);
+  }
+
+  .a2-summary {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    max-width: 38rem;
+  }
+
+  .a2-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.75rem;
+    margin: 0;
+  }
+
+  .a2-meta dt {
+    font-family: var(--a2-pixel);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    color: var(--a2-dim);
+    text-transform: uppercase;
+  }
+
+  .a2-meta dd {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .a2-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .a2-tags li {
+    padding: 0.1rem 0.5rem;
+    font-family: var(--a2-term);
+    font-size: 1.05rem;
+    line-height: 1.3;
+    color: var(--a2-phosphor);
+    border: 1px solid var(--a2-dim);
+  }
+
+  .a2-highlight {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.6rem 0.8rem;
+    margin: 0;
+    background: var(--a2-term-bg);
+    border-left: 3px solid var(--a2-magenta);
+  }
+
+  .a2-highlight strong {
+    font-family: var(--a2-term);
+    font-size: 1.6rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--a2-phosphor);
+  }
+
+  .a2-source {
+    font-size: 0.78rem;
+    color: #9ad8ae;
+  }
+
+  .a2-chart {
+    padding: 0.6rem 0.8rem;
+    margin: 0;
+    background: var(--a2-term-bg);
+    border: 1px solid var(--a2-dim);
+  }
+
+  .a2-chart figcaption {
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .a2-chart svg {
+    display: block;
+    width: 100%;
+    max-width: 30rem;
+  }
+
+  .a2-chart text {
+    font-family: var(--a2-term);
+    font-size: 15px;
+    fill: var(--a2-text);
+  }
+
+  .a2-chart rect {
+    fill: var(--a2-phosphor);
+  }
+
+  .a2-chart .bm-source {
+    margin: 0.3rem 0 0;
+    font-size: 0.78rem;
+    color: #9ad8ae;
+  }
+
+  .a2-chart-empty {
+    font-family: var(--a2-term);
+    font-size: 1.05rem;
+    color: var(--a2-dim);
+  }
+
+  .a2-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0;
+  }
+
+  .a2-btn,
+  .a2-skip,
+  .a2-chips button {
+    display: inline-block;
+    padding: 0.3rem 0.85rem;
+    font-family: var(--a2-pixel);
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--a2-cyan);
+    text-decoration: none;
+    cursor: pointer;
+    background: #10201a;
+    border: 2px solid;
+    border-color: var(--a2-hi) var(--a2-lo) var(--a2-lo) var(--a2-hi);
+  }
+
+  :is(.a2-btn, .a2-skip, .a2-chips button):hover {
+    color: var(--a2-bg);
+    background: var(--a2-cyan);
+  }
+
+  :is(.a2-btn, .a2-skip, .a2-chips button):active {
+    border-color: var(--a2-lo) var(--a2-hi) var(--a2-hi) var(--a2-lo);
+  }
+
+  /* ── The console ───────────────────────────────────────────────────────── */
+
+  .a2-console {
+    width: min(48rem, 100%);
+  }
+
+  .a2-skip {
+    padding: 0.05rem 0.6rem;
+    font-size: 0.78rem;
+    color: var(--a2-bg);
+    background: #b9e6c6;
+    border-color: #eafff0 #4c7a5b #4c7a5b #eafff0;
+  }
+
+  .a2-term {
+    padding: 0.8rem 1rem 0.6rem;
+    font-family: var(--a2-term);
+    font-size: 1.25rem;
+    line-height: 1.25;
+    color: var(--a2-phosphor);
+    background: var(--a2-term-bg);
+    border: 2px solid;
+    border-color: var(--a2-lo) var(--a2-hi) var(--a2-hi) var(--a2-lo);
+    text-shadow: 0 0 6px rgb(57 255 122 / 35%);
+  }
+
+  .a2-screen {
+    height: min(15rem, 34vh);
+    overflow-y: auto;
+    scrollbar-color: var(--a2-dim) var(--a2-term-bg);
+  }
+
+  .a2-screen p {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .a2-screen .is-echo {
+    color: var(--a2-text);
+  }
+
+  /* The typing cursor: a block that blinks once a second (steps, never a fade). */
+  .a2-screen.is-typing p:last-child::after {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 1px;
+    vertical-align: -0.12em;
+    background: var(--a2-phosphor);
+    content: '';
+    animation: a2-blink 1s steps(1, end) infinite;
+  }
+
+  @keyframes a2-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .a2-prompt {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    padding-top: 0.4rem;
+    margin-top: 0.4rem;
+    border-top: 1px dashed rgb(31 168 85 / 50%);
+  }
+
+  .a2-ps1 {
+    flex: none;
+    color: var(--a2-amber);
+  }
+
+  .a2-prompt input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    font: inherit;
+    color: var(--a2-text);
+    caret-color: var(--a2-amber);
+    background: transparent;
+    border: 0;
+  }
+
+  .a2-prompt input:focus-visible {
+    outline: none;
+  }
+
+  .a2-prompt:focus-within {
+    box-shadow: 0 2px 0 var(--a2-amber);
+  }
+
+  .a2-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.7rem 0.6rem 0.6rem;
+    margin: 0;
+    list-style: none;
+    background: var(--a2-window);
+  }
+
+  .a2-chips button {
+    font-family: var(--a2-term);
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--a2-phosphor);
+  }
+
+  /* Without JavaScript the console is a printout: its boot screen, no prompt to type into. */
+  html:not(.js) .a2-prompt,
+  html:not(.js) .a2-chips,
+  html:not(.js) .a2-skip {
+    display: none;
+  }
+
+  /* ── The descent's layout for Act II ───────────────────────────────────── */
+
+  html[data-mode='descent'] [data-scene='act-1999'] .beat {
+    grid-template-columns: minmax(0, 48rem);
+    justify-items: center;
+    padding: 5.5rem calc(var(--gauge-width) + 3rem) 3.5rem max(16rem, 21vw);
+  }
+
+  html[data-mode='descent'] .a2-rack {
+    position: absolute;
+    top: 50%;
+    left: 2rem;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: start;
+    margin: 0;
+    padding: 0.8rem 1.6rem 0.8rem 0.7rem;
+    background: rgb(5 8 10 / 82%);
+    border: 2px solid;
+    border-color: var(--a2-hi) var(--a2-lo) var(--a2-lo) var(--a2-hi);
+    translate: 0 -50%;
+  }
+
+  html[data-mode='descent'] .a2-rack ol {
+    flex-flow: column nowrap;
+  }
+
+  @media (width < 1100px) {
+    html[data-mode='descent'] .a2-cart {
+      width: 8.5rem;
+    }
+
+    html[data-mode='descent'] [data-scene='act-1999'] .beat {
+      padding-left: 13rem;
+    }
+  }
+
+  /* ── Reduced motion: the same act, still ───────────────────────────────── */
+
+  @media (prefers-reduced-motion: reduce) {
+    .a2-cart {
+      transition: none;
+    }
+
+    .is-flickering .a2-flicker::after,
+    .a2-screen.is-typing p:last-child::after {
+      animation: none;
+    }
+  }
+}

@@ -14,4 +14,18 @@ cli:
 resume: { include: true, bullets: [] }
 ---
 
-Documents itself: Lighthouse scores and payload sizes come from CI once the era engine ships.
+## The idea
+
+Each era is what people of that time imagined the future would be. Scrolling down travels back in time: clean 2099 glass decays into a 1999 cyber grid, hardens into 1888 brass machinery, then dissolves into 1350 alchemy.
+
+## How it is built
+
+[add case study: one content model feeding the static page, the descent, the resume and its PDF; the scroll engine (one master timeline, 1 second = 1 vh); and the stacked fallback for reduced motion and small screens]
+
+## Budgets
+
+[add case study: Lighthouse scores and payload sizes from CI, once the era engine ships]
+
+## What I would do next
+
+[add case study]

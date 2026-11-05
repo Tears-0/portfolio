@@ -19,4 +19,28 @@ cli:
 resume: { include: true, bullets: [] }
 ---
 
-Case study arrives in M3. Final title, paper status, repository link (crediting both supervisors) and 1–2 figures are still to add.
+## The question
+
+[add case study: what the model predicts from the proteomics data, and why that matters, in two or three sentences]
+
+## Data
+
+Only nine samples (N = 9). That is far too few to train a deep model and trust it, so the project became a benchmark of what helps when samples are this scarce. Every result below should be read with that limit in mind.
+
+[add case study: the LC-MS dataset, and how the ESM-2 protein embeddings were produced]
+
+## Approach
+
+[add case study: how the fusion model combines ESM-2 embeddings with LC-MS abundances, the baselines it is compared with, and how it was evaluated with so few samples]
+
+## Results
+
+[add case study: the ablation or permutation-test result, with its section in the manuscript; one or two figures]
+
+## What I would do next
+
+[add case study: what the benchmark suggests for the next study]
+
+## Credits
+
+[add case study: both supervisors, the lab, and the repository link]
