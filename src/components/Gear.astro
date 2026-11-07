@@ -1,0 +1,37 @@
+---
+// One involute gear, drawn at build time (gear.ts) and placed by its train's layout. The scene
+// turns it by setting the rotation of its inner group, around the gear's own centre.
+import { gearGeometry, gearPath } from '../scenes/act-1888/gear';
+
+interface Props {
+  id: string;
+  teeth: number;
+  module: number;
+  x: number;
+  y: number;
+  /** Lightening holes between hub and rim, for larger wheels. */
+  spokes?: number;
+}
+const { id, teeth, module, x, y, spokes = 0 } = Astro.props;
+const g = gearGeometry({ teeth, module });
+const holeRadius = (g.root - g.root * 0.3) * 0.36;
+const holeDistance = g.root * 0.62;
+const holes = Array.from({ length: spokes }, (_, i) => {
+  const a = (i / spokes) * Math.PI * 2;
+  return {
+    cx: Math.round(holeDistance * Math.cos(a) * 10) / 10,
+    cy: Math.round(holeDistance * Math.sin(a) * 10) / 10,
+  };
+});
+---
+
+<g class="gear" transform={`translate(${x} ${y})`}>
+  <g class="gear-turn" data-gear={id}>
+    <path class="gear-body" d={gearPath({ teeth, module })}></path>
+    {holes.map((h) => (
+      <circle class="gear-hole" cx={h.cx} cy={h.cy} r={holeRadius} />
+    ))}
+    <circle class="gear-hub" r={Math.max(4, g.root * 0.22)}></circle>
+    <circle class="gear-axle" r={Math.max(2, g.root * 0.08)}></circle>
+  </g>
+</g>

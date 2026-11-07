@@ -1,0 +1,17 @@
+---
+// A bank of steam: soft parchment-white puffs (radial gradients, no blur filter, so it costs
+// little to animate). Transition B vents it over the cut; Act III's arrival clears it.
+import '../scenes/act-1888/steam.css';
+
+interface Props {
+  /** Selector hook for the scene that drives it. */
+  id: string;
+}
+const { id } = Astro.props;
+---
+
+<div class="steam" aria-hidden="true" data-steam={id}>
+  {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+    <span class={`puff p${n}`} />
+  ))}
+</div>

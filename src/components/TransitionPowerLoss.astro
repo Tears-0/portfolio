@@ -1,0 +1,51 @@
+---
+// Transition B · Power loss (1999 → 1888): the 1999 picture flickers and drains of colour,
+// collapses to a bright line and a dot, then its grid lines come back thick and solid as
+// copper pipe; a gear meshes in and steam vents over the cut. Decorative only: hidden from
+// assistive technology, and stacked mode leaves transitions out.
+import '../scenes/t-power-loss/t-power-loss.css';
+import { PIPES, PIPE_BOX, toD } from '../scenes/act-1888/pipes';
+import { POWER_LOSS_TRAIN, trainViewBox } from '../scenes/act-1888/train';
+import type { SceneDef } from '../scenes/registry';
+import Gear from './Gear.astro';
+import GridHorizon from './GridHorizon.astro';
+import SceneLayer from './SceneLayer.astro';
+import Steam from './Steam.astro';
+
+interface Props {
+  scene: SceneDef;
+}
+const { scene } = Astro.props;
+---
+
+<SceneLayer scene={scene}>
+  <div class="tb-room" data-tb-room></div>
+  <div class="tb-picture" data-tb-picture>
+    <GridHorizon />
+    <div class="tb-dim" data-tb-dim></div>
+    <div class="tb-crt"></div>
+  </div>
+  <div class="tb-line" data-tb-line></div>
+  <svg
+    class="tb-pipes"
+    viewBox={`0 0 ${PIPE_BOX.width} ${PIPE_BOX.height}`}
+    preserveAspectRatio="xMidYMid slice"
+    data-tb-pipes
+  >
+    {PIPES.map((pipe) => (
+      <g data-pipe={pipe.id}>
+        <path class="tb-shell" d={toD(pipe.grid)} />
+        <path class="tb-core" d={toD(pipe.grid)} />
+        <path class="tb-shine" d={toD(pipe.grid)} />
+      </g>
+    ))}
+  </svg>
+  <svg class="tb-gears" viewBox={trainViewBox(POWER_LOSS_TRAIN, 7)} data-tb-gears>
+    {POWER_LOSS_TRAIN.map((g) => (
+      <g data-tb-gear={g.id}>
+        <Gear id={g.id} teeth={g.teeth} module={7} x={g.x} y={g.y} spokes={g.teeth > 20 ? 5 : 0} />
+      </g>
+    ))}
+  </svg>
+  <Steam id="tb" />
+</SceneLayer>

@@ -1,5 +1,6 @@
 import { addBeatFades, sceneTimeline } from '../beats';
 import type { Beat } from '../registry';
+import { activeStep } from '../steps';
 import type { SceneContext, SceneModule } from '../types';
 
 /** Positions within Act II, in vh from its start (scroll map and storyboard II-1 to II-5). */
@@ -11,6 +12,7 @@ const CART_LEAD = 8; // vh before its window opens that a cartridge slides forwa
 const WINDOW_OPEN = 6; // vh a window takes to open (or close), in four steps
 const FLICKER_FROM = 220; // II-5 (470 vh): the picture starts to flicker, as if losing power
 const FLICKER_DIM = 0.22; // how dark the picture gets by the end of the act
+const RACK_OUT = 226; // the rack powers down first, gone before the power loss (500 vh)
 
 const CLOSED = 'inset(50% 0% 50% 0%)';
 const OPEN = 'inset(0% 0% 0% 0%)';
@@ -20,15 +22,8 @@ export const gridOffset = (progress: number): number =>
   Math.round(((Math.min(1, Math.max(0, progress)) * GRID_TRAVEL) % GRID_CELL) * 100) / 100;
 
 /** The cartridge (1–4) that is out of the rack at `vh`, or 0 before the first and at the console. */
-export function activeCartridge(vh: number, beats: readonly Beat[]): number {
-  let active = 0;
-  beats.forEach((beat) => {
-    const n = Number(beat.id.match(/^project-(\d+)$/)?.[1]);
-    if (n && vh >= beat.from - CART_LEAD) active = n;
-    if (beat.id === 'console' && vh >= beat.from) active = 0;
-  });
-  return active;
-}
+export const activeCartridge = (vh: number, beats: readonly Beat[]): number =>
+  activeStep(vh, beats, 'project', CART_LEAD, 'console');
 
 /**
  * Act II · 1999. The grid horizon flies toward the viewer for the whole act, the cartridge
@@ -81,6 +76,8 @@ function actTwo(): SceneModule {
           end - closeFor,
         );
       }
+
+      tl.to(q('[data-a2-rack]'), { autoAlpha: 0, duration: 16, ease: 'steps(4)' }, RACK_OUT);
 
       // II-5: the picture dims toward the power loss.
       tl.fromTo(

@@ -27,6 +27,13 @@ export const getSkills = async () => (await getCollection('skills')).sort(byOrde
 export const getEducation = async () => getCollection('education');
 export const getPublications = async () => getCollection('publications');
 
+/** The architecture plate (Act III): the first record is the one on the wall. */
+export async function getArchitecture(): Promise<CollectionEntry<'architecture'>['data']> {
+  const [entry] = await getCollection('architecture');
+  if (!entry) throw new Error('Missing architecture record (src/content/architecture.yaml)');
+  return entry.data;
+}
+
 export async function getEras() {
   return (await getCollection('eras'))
     .map((era) => ({ id: era.id as '2099' | '1999' | '1888' | '1350', ...era.data }))

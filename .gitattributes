@@ -1,0 +1,3 @@
+# Keep LF line endings in the working tree on every machine (Prettier requires LF), whatever
+# core.autocrlf says. Binary files are detected and left alone.
+* text=auto eol=lf

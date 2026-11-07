@@ -100,6 +100,21 @@ describe('the built site', () => {
     }
   });
 
+  it('shows every tool, with its tier, on the static page and on the 1888 gauges', () => {
+    const tools = [
+      ...readFileSync('src/content/skills.yaml', 'utf8').matchAll(
+        /- name: '?(.+?)'?\n\s+tier: (\w+)/g,
+      ),
+    ].map((m) => ({ name: m[1]!, tier: m[2]! }));
+    expect(tools.length).toBeGreaterThan(10);
+    for (const page of ['index.html', 'descent.html']) {
+      const text = decode(read(page)).replace(/\s+/g, ' ');
+      for (const { name, tier } of tools) {
+        expect(text, `${name} on ${page}`).toContain(`${name} ${tier}`);
+      }
+    }
+  });
+
   it('keeps the descent out of search results until launch', () => {
     expect(read('descent.html')).toContain('<meta name="robots" content="noindex"');
   });

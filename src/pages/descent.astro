@@ -9,19 +9,30 @@ import SceneLayer from '../components/SceneLayer.astro';
 import ScrollMarkers from '../components/ScrollMarkers.astro';
 import TimelineGauge from '../components/TimelineGauge.astro';
 import TimeMachineLoading from '../components/TimeMachineLoading.astro';
+import TransitionPowerLoss from '../components/TransitionPowerLoss.astro';
 import TransitionShatter from '../components/TransitionShatter.astro';
 import Descent from '../layouts/Descent.astro';
-import { getEras, getFeaturedProjects, getPhilosophy, getProfile, getSkills } from '../lib/content';
+import {
+  getArchitecture,
+  getEras,
+  getFeaturedProjects,
+  getPhilosophy,
+  getProfile,
+  getProjects,
+  getSkills,
+} from '../lib/content';
 import { SCENES, type SceneDef, type SceneId } from '../scenes/registry';
 
 const scene = (id: SceneId): SceneDef => SCENES.find((s) => s.id === id)!;
 
-const [eras, profile, philosophy, projects, skills] = await Promise.all([
+const [eras, profile, philosophy, projects, allProjects, skills, architecture] = await Promise.all([
   getEras(),
   getProfile(),
   getPhilosophy(),
   getFeaturedProjects(),
+  getProjects(),
   getSkills(),
+  getArchitecture(),
 ]);
 ---
 
@@ -35,8 +46,13 @@ const [eras, profile, philosophy, projects, skills] = await Promise.all([
       <Act2099 scene={scene('act-2099')} profile={profile} />
       <TransitionShatter scene={scene('shatter')} />
       <Act1999 scene={scene('act-1999')} projects={projects} profile={profile} />
-      <SceneLayer scene={scene('power-loss')} />
-      <Act1888 scene={scene('act-1888')} skills={skills} />
+      <TransitionPowerLoss scene={scene('power-loss')} />
+      <Act1888
+        scene={scene('act-1888')}
+        skills={skills}
+        projects={allProjects}
+        architecture={architecture}
+      />
       <SceneLayer scene={scene('rust-to-gold')} />
       <Act1350 scene={scene('act-1350')} philosophy={philosophy} profile={profile} />
     </div>

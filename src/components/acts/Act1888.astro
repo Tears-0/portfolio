@@ -1,58 +1,314 @@
 ---
+// Act III · 1888 · The Engine of Tomorrow. An analytical engine room: cast-iron plates, copper
+// pipes, a flywheel, and a control panel whose valves drive a gear train that turns a drum of
+// skill gauges. The last plate is an engraved schematic of a system built for real.
+import '@fontsource/old-standard-tt/400.css';
+import '@fontsource/old-standard-tt/700.css';
+import '@fontsource/playfair-display-sc/700.css';
+import '@fontsource/special-elite';
 import type { CollectionEntry } from 'astro:content';
+import '../../scenes/act-1888/act-1888.css';
+import { publishText } from '../../lib/placeholder';
+import { PIPES, PIPE_BOX, VENTS, toD } from '../../scenes/act-1888/pipes';
+import { FLYWHEEL_TRAIN, PANEL_TRAIN, trainViewBox } from '../../scenes/act-1888/train';
 import type { SceneDef } from '../../scenes/registry';
 import Beat from '../Beat.astro';
+import Gear from '../Gear.astro';
 import SceneLayer from '../SceneLayer.astro';
+import Steam from '../Steam.astro';
 
 interface Props {
   scene: SceneDef;
   /** Skill categories in order: one valve and one rest point each. */
   skills: CollectionEntry<'skills'>[];
+  /** Every project, so each gauge can name the projects that prove it. */
+  projects: CollectionEntry<'projects'>[];
+  architecture: CollectionEntry<'architecture'>['data'];
 }
-const { scene, skills } = Astro.props;
+const { scene, skills, projects, architecture } = Astro.props;
+
+const titleOf = new Map(projects.map((p) => [p.id, p.data.title]));
+const valves = skills.slice(0, 4).map((skill, i) => ({
+  skill,
+  n: i + 1,
+  rest: scene.beats.find((b) => b.id === `valve-${i + 1}`)?.rest ?? scene.from,
+}));
+
+// Dials: a half circle, needle up = Comfortable. Familiar sits left, Daily right.
+const DIAL = { cx: 60, cy: 64, r: 48 };
+const at = (deg: number, r = DIAL.r, c = DIAL) => {
+  const a = (deg * Math.PI) / 180;
+  return `${Math.round((c.cx + r * Math.cos(a)) * 10) / 10} ${Math.round((c.cy - r * Math.sin(a)) * 10) / 10}`;
+};
+const arc = (from: number, to: number, r = DIAL.r, c = DIAL) =>
+  `M ${at(from, r, c)} A ${r} ${r} 0 0 1 ${at(to, r, c)}`;
+const ZONES = [
+  { tier: 'Familiar', from: 180, to: 121 },
+  { tier: 'Comfortable', from: 119, to: 61 },
+  { tier: 'Daily', from: 59, to: 0 },
+] as const;
+const ticks = Array.from({ length: 13 }, (_, i) => i * 15);
+const LEGEND = { cx: 110, cy: 112, r: 88 };
+const face = (c: typeof DIAL) =>
+  `M ${c.cx - c.r - 6} ${c.cy} A ${c.r + 6} ${c.r + 6} 0 0 1 ${c.cx + c.r + 6} ${c.cy} Z`;
+const schematic = architecture.stages.map((stage) => ({
+  label: stage.label,
+  detail: publishText(stage.detail),
+}));
+const plateProject = titleOf.get(architecture.project.id);
+
+// Steam vents on the pipework: a collar on the pipe, a stem and flange, and three puffs that
+// leave the mouth (drawn with the jet pointing along +x, then turned to the vent's angle).
+const vents = VENTS.map((vent) => {
+  const bore = PIPES.find((p) => p.id === vent.pipe)?.bore ?? 12;
+  return { ...vent, bore, mouth: bore / 2 + 18 };
+});
+// The throttle's quadrant: a slotted arc from -50° to 50° around the lever's pivot.
+const PIVOT = { x: 32, y: 64 };
+const onQuadrant = (deg: number, r: number) => {
+  const a = (deg * Math.PI) / 180;
+  return `${Math.round((PIVOT.x + r * Math.sin(a)) * 10) / 10} ${Math.round((PIVOT.y - r * Math.cos(a)) * 10) / 10}`;
+};
+const notches = [-40, -20, 0, 20, 40];
 ---
 
 <SceneLayer scene={scene} anchor="engine" heading="1888 · The Engine">
-  <Beat scene="act-1888" beat="overview">
-    <div class="panel">
-      <h3>Control panel</h3>
-      <ul class="valves">
-        {skills.map((skill) => (
-          <li>{skill.data.name}</li>
-        ))}
-      </ul>
-      <p class="gb-note" aria-hidden="true">
-        Valves, involute gear trains and tier gauges arrive in M4
-      </p>
-    </div>
-  </Beat>
-  {skills.slice(0, 4).map((skill, i) => (
-    <Beat scene="act-1888" beat={`valve-${i + 1}`}>
-      <section class="panel valve" aria-labelledby={`skill-${skill.id}`}>
-        <h3 id={`skill-${skill.id}`}>{skill.data.name}</h3>
-        <ul class="tools">
-          {skill.data.tools.map((tool) => (
-            <li>
-              <span>{tool.name}</span>
-              <span class="tier" data-tier={tool.tier}>
-                {tool.tier}
-              </span>
-            </li>
+  <div class="a3-wall" aria-hidden="true">
+    <svg class="a3-flywheel" viewBox={trainViewBox(FLYWHEEL_TRAIN, 9)} data-a3-flywheel>
+      {FLYWHEEL_TRAIN.map((g) => (
+        <Gear id={g.id} teeth={g.teeth} module={9} x={g.x} y={g.y} spokes={g.teeth > 30 ? 6 : 0} />
+      ))}
+    </svg>
+    <svg
+      class="a3-pipes"
+      viewBox={`0 0 ${PIPE_BOX.width} ${PIPE_BOX.height}`}
+      preserveAspectRatio="xMidYMid slice"
+    >
+      {PIPES.map((pipe) => (
+        <g class="pipe" data-bore={pipe.bore}>
+          <path class="pipe-shell" d={toD(pipe.pipe)} stroke-width={pipe.bore + 4} />
+          <path class="pipe-core" d={toD(pipe.pipe)} stroke-width={pipe.bore} />
+          <path
+            class="pipe-shine"
+            d={toD(pipe.pipe)}
+            stroke-width={Math.max(2, pipe.bore * 0.22)}
+          />
+        </g>
+      ))}
+      <defs>
+        <radialGradient id="a3-puff">
+          <stop offset="0" stop-color="#f6ecd8" stop-opacity="0.9"></stop>
+          <stop offset="0.6" stop-color="#efe2c8" stop-opacity="0.4"></stop>
+          <stop offset="1" stop-color="#efe2c8" stop-opacity="0"></stop>
+        </radialGradient>
+      </defs>
+      {vents.map((v) => (
+        <g
+          class:list={['vent', `vent-${v.id}`]}
+          transform={`translate(${v.at[0]} ${v.at[1]}) rotate(${v.angle})`}
+        >
+          <rect class="vent-stem" x={v.bore / 2} y="-4" width={v.mouth - v.bore / 2} height="8" />
+          <rect
+            class="vent-collar"
+            x={-(v.bore / 2 + 3)}
+            y="-7"
+            width={v.bore + 6}
+            height="14"
+            rx="2"
+          />
+          <rect class="vent-flange" x={v.mouth - 5} y="-8" width="5" height="16" rx="1" />
+          {[1, 2, 3].map((n) => (
+            <circle
+              class:list={['vent-jet', `j${n}`]}
+              cx={v.mouth + 10}
+              cy="0"
+              r="12"
+              fill="url(#a3-puff)"
+            />
           ))}
+        </g>
+      ))}
+    </svg>
+  </div>
+  <Steam id="a3" />
+  <div class="a3-rust" aria-hidden="true"></div>
+
+  <nav class="a3-panel" aria-label="Valves" data-a3-panel>
+    <svg class="a3-relief" viewBox="-20 -64 40 76" aria-hidden="true" data-a3-relief>
+      <defs>
+        <radialGradient id="a3-hiss">
+          <stop offset="0" stop-color="#f6ecd8" stop-opacity="0.95"></stop>
+          <stop offset="0.6" stop-color="#efe2c8" stop-opacity="0.45"></stop>
+          <stop offset="1" stop-color="#efe2c8" stop-opacity="0"></stop>
+        </radialGradient>
+      </defs>
+      {[1, 2, 3].map((n) => (
+        <circle class:list={['relief-jet', `j${n}`]} cx="0" cy="-30" r="11" fill="url(#a3-hiss)" />
+      ))}
+      <rect class="relief-stem" x="-4" y="-6" width="8" height="18"></rect>
+      <path class="relief-body" d="M -10 -6 H 10 L 6 -20 H -6 Z"></path>
+      <rect class="relief-cap" x="-6" y="-26" width="12" height="6" rx="1.5"></rect>
+    </svg>
+    <p class="a3-panel-label" aria-hidden="true">
+      Control panel
+    </p>
+    <ol>
+      {valves.map(({ skill, n }) => (
+        <li>
+          <a class="a3-valve" href={`#skill-${skill.id}`} data-valve={n}>
+            <svg class="a3-wheel" viewBox="-20 -20 40 40" aria-hidden="true">
+              <circle class="a3-wheel-rim" r="16" />
+              <path
+                class="a3-wheel-spokes"
+                d="M -16 0 H 16 M 0 -16 V 16 M -11 -11 L 11 11 M -11 11 L 11 -11"
+              />
+              <circle class="a3-wheel-hub" r="4.5" />
+            </svg>
+            <span class="a3-valve-name">{skill.data.name}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+    <div class="a3-works">
+      <svg class="a3-train" viewBox={trainViewBox(PANEL_TRAIN, 4)} aria-hidden="true">
+        {PANEL_TRAIN.map((g) => (
+          <Gear
+            id={g.id}
+            teeth={g.teeth}
+            module={4}
+            x={g.x}
+            y={g.y}
+            spokes={g.teeth > 18 ? 4 : 0}
+          />
+        ))}
+      </svg>
+      <svg class="a3-throttle" viewBox="0 0 64 78" aria-hidden="true">
+        <path
+          class="throttle-quadrant"
+          d={`M ${onQuadrant(-50, 42)} A 42 42 0 0 1 ${onQuadrant(50, 42)}`}
+        ></path>
+        <path
+          class="throttle-slot"
+          d={`M ${onQuadrant(-46, 42)} A 42 42 0 0 1 ${onQuadrant(46, 42)}`}
+        ></path>
+        {notches.map((n) => (
+          <path class="throttle-notch" d={`M ${onQuadrant(n, 36)} L ${onQuadrant(n, 48)}`} />
+        ))}
+        <path
+          class="throttle-full"
+          d={`M ${onQuadrant(36, 50)} A 50 50 0 0 1 ${onQuadrant(48, 50)}`}
+        ></path>
+        <g class="throttle-arm" data-a3-throttle transform={`rotate(-40 ${PIVOT.x} ${PIVOT.y})`}>
+          <path
+            d={`M ${PIVOT.x - 2.5} ${PIVOT.y} L ${PIVOT.x} ${PIVOT.y - 52} L ${PIVOT.x + 2.5} ${PIVOT.y} Z`}
+          ></path>
+          <circle class="throttle-knob" cx={PIVOT.x} cy={PIVOT.y - 52} r="5.5"></circle>
+        </g>
+        <circle class="throttle-pivot" cx={PIVOT.x} cy={PIVOT.y} r="5"></circle>
+        <text class="throttle-label" x={PIVOT.x} y={PIVOT.y + 13}>
+          Throttle
+        </text>
+      </svg>
+    </div>
+  </nav>
+
+  <Beat scene="act-1888" beat="overview">
+    <section class="a3-plate a3-intro" aria-labelledby="engine-intro-title">
+      <h3 id="engine-intro-title">The Engine of Tomorrow</h3>
+      <p>
+        Each valve on the panel opens one kind of work. Turn one to read its gauges: every needle
+        settles on Daily, Comfortable or Familiar. Hover or focus a gauge for the projects that
+        prove it.
+      </p>
+      <svg class="a3-legend" viewBox="0 0 220 128" aria-hidden="true">
+        <path class="a3-face" d={face(LEGEND)} />
+        {ZONES.map((z) => (
+          <path class:list={['a3-zone', `z-${z.tier}`]} d={arc(z.from, z.to, LEGEND.r, LEGEND)} />
+        ))}
+        {ZONES.map((z) => {
+          const mid = (z.from + z.to) / 2;
+          const [x, y] = at(mid, LEGEND.r - 22, LEGEND).split(' ');
+          return (
+            <text class="a3-legend-label" x={x} y={y}>
+              {z.tier}
+            </text>
+          );
+        })}
+        <g class="a3-needle a3-legend-needle">
+          <path
+            d={`M ${LEGEND.cx - 3} ${LEGEND.cy} L ${LEGEND.cx} ${LEGEND.cy - 74} L ${LEGEND.cx + 3} ${LEGEND.cy} Z`}
+          />
+          <circle cx={LEGEND.cx} cy={LEGEND.cy} r="6" />
+        </g>
+      </svg>
+    </section>
+  </Beat>
+
+  {valves.map(({ skill, n, rest }) => (
+    <Beat scene="act-1888" beat={`valve-${n}`}>
+      <section
+        class="a3-plate a3-drum"
+        id={`skill-${skill.id}`}
+        aria-labelledby={`skill-${skill.id}-title`}
+        tabindex="-1"
+        data-rest={rest}
+        data-a3-drum
+      >
+        <h3 id={`skill-${skill.id}-title`}>{skill.data.name}</h3>
+        <ul class="a3-gauges">
+          {skill.data.tools.map((tool, i) => {
+            const proof = tool.evidence.flatMap((e) => titleOf.get(e.id) ?? []);
+            return (
+              <li class="a3-gauge" data-tier={tool.tier} tabindex="0">
+                <svg class="a3-dial" viewBox="0 0 120 72" aria-hidden="true">
+                  <path class="a3-face" d={face(DIAL)} />
+                  {ZONES.map((z) => (
+                    <path class:list={['a3-zone', `z-${z.tier}`]} d={arc(z.from, z.to)} />
+                  ))}
+                  {ticks.map((t) => (
+                    <path class="a3-tick" d={`M ${at(t, DIAL.r - 9)} L ${at(t, DIAL.r - 5)}`} />
+                  ))}
+                  <g class="a3-needle">
+                    <path
+                      d={`M ${DIAL.cx - 2} ${DIAL.cy} L ${DIAL.cx} ${DIAL.cy - 40} L ${DIAL.cx + 2} ${DIAL.cy} Z`}
+                    />
+                    <circle cx={DIAL.cx} cy={DIAL.cy} r="4" />
+                  </g>
+                </svg>
+                <span class="a3-tool">{tool.name}</span>
+                <span class="a3-tier">{tool.tier}</span>
+                {proof.length > 0 && (
+                  <span class="a3-proof" id={`proof-${skill.id}-${i}`}>
+                    Proof: {proof.join('; ')}
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
     </Beat>
   ))}
+
   <Beat scene="act-1888" beat="plate">
-    <div class="panel">
-      <h3>Architecture plate</h3>
-      <p>
-        One engraved schematic of a system you built, with pipes standing in for data flow. Draft
-        choice: the quantization benchmark harness.
-      </p>
-      <p class="gb-note" aria-hidden="true">
-        Grey box until M4
-      </p>
-    </div>
+    <section
+      class="a3-plate a3-schematic"
+      id="architecture"
+      aria-labelledby="plate-title"
+      tabindex="-1"
+      data-rest={scene.beats.find((b) => b.id === 'plate')?.rest}
+    >
+      <p class="a3-kicker">Architecture plate{plateProject && ` · ${plateProject}`}</p>
+      <h3 id="plate-title">{architecture.title}</h3>
+      <p class="a3-caption">{architecture.caption}</p>
+      <ol class="a3-flow">
+        {schematic.map((stage) => (
+          <li>
+            <span class="a3-stage">{stage.label}</span>
+            {stage.detail && <span class="a3-stage-detail">{stage.detail}</span>}
+          </li>
+        ))}
+      </ol>
+    </section>
   </Beat>
 </SceneLayer>

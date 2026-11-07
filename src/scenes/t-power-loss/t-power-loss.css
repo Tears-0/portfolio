@@ -1,0 +1,136 @@
+/* Transition B · Power loss. The 1999 picture is a CSS layer that drains, flickers and
+   collapses; the pipes are SVG strokes the scene morphs from grid lines (scene.ts). */
+@layer reset, tokens, base, layout, components, prototype, scenes;
+
+@layer scenes {
+  [data-scene='power-loss'] {
+    background: #000;
+  }
+
+  [data-scene='power-loss'] .layer-head {
+    display: none;
+  }
+
+  .tb-room {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(70% 60% at 45% 45%, rgb(242 193 78 / 7%), transparent 70%),
+      linear-gradient(160deg, #241a14, #1c1410 60%);
+    opacity: 0;
+  }
+
+  .tb-picture {
+    position: absolute;
+    inset: 0;
+    background: #05080a;
+    transform-origin: 50% 50%;
+  }
+
+  /* As Act II leaves it: dimmed, and flickering at under two flashes a second. */
+  .tb-dim {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background: #000;
+    opacity: 0.22;
+  }
+
+  .tb-dim::after {
+    position: absolute;
+    inset: 0;
+    background: rgb(200 255 217 / 7%);
+    opacity: 0;
+    content: '';
+  }
+
+  .is-flickering .tb-dim::after {
+    animation: tb-flicker 1.3s steps(1, end) infinite;
+  }
+
+  @keyframes tb-flicker {
+    0%,
+    100% {
+      opacity: 0;
+    }
+
+    38% {
+      opacity: 1;
+    }
+
+    44% {
+      opacity: 0;
+    }
+
+    81% {
+      opacity: 0.6;
+    }
+
+    86% {
+      opacity: 0;
+    }
+  }
+
+  /* The CRT as Act II draws it. */
+  .tb-crt {
+    position: absolute;
+    inset: 1.2vmin;
+    z-index: 6;
+    border-radius: 3vmin / 4.5vmin;
+    background:
+      radial-gradient(120% 95% at 50% 50%, transparent 62%, rgb(0 0 0 / 55%) 100%),
+      repeating-linear-gradient(to bottom, rgb(0 0 0 / 22%) 0 1px, transparent 1px 3px);
+    box-shadow: 0 0 0 100vmax #000;
+  }
+
+  /* The picture's last light: a bright line, then a dot. */
+  .tb-line {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 3px;
+    margin-top: -1.5px;
+    background: #eafff0;
+    box-shadow:
+      0 0 18px 6px rgb(200 255 217 / 70%),
+      0 0 60px 20px rgb(57 255 122 / 35%);
+    opacity: 0;
+  }
+
+  .tb-pipes {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+
+  .tb-pipes path {
+    fill: none;
+    stroke-linejoin: round;
+  }
+
+  .tb-shine {
+    translate: 0 -3px;
+  }
+
+  .tb-gears {
+    position: absolute;
+    right: 8vw;
+    bottom: 6vh;
+    width: min(40vw, 34rem);
+    overflow: visible;
+    opacity: 0;
+  }
+
+  .tb-gears .gear-body {
+    fill: #7a5c30;
+    stroke: #d9b25f;
+  }
+
+  [data-scene='power-loss'] .steam {
+    z-index: 7;
+    opacity: 0;
+  }
+}

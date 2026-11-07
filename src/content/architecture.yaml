@@ -1,0 +1,17 @@
+# Act III's architecture plate: one engraved schematic of a system you built, with pipes
+# standing in for data flow. Stages run in order; each detail is optional.
+- id: quantization-harness
+  title: The quantization benchmark harness
+  project: quantization-benchmark
+  caption: How one model becomes a row in the results table.
+  stages:
+    - label: FP16 reference
+      detail: The unquantized model, the baseline every format is measured against
+    - label: Quantize
+      detail: GGUF Q4–Q6 · AWQ · GPTQ · EXL3 · FP8 · NF4
+    - label: Run on an RTX 5070 Ti
+      detail: '[add] the runtime for each format, and the prompt set'
+    - label: Measure
+      detail: KL divergence against FP16 · tokens per second · VRAM · power
+    - label: Results CSV
+      detail: One row per format, each with its source; it feeds the 1999 chart and console

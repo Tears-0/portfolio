@@ -1,0 +1,65 @@
+/* Steam: puffs of parchment-white vapour. Each puff is a radial gradient, so the bank fades,
+   drifts and grows with transforms and opacity only. */
+@layer reset, tokens, base, layout, components, prototype, scenes;
+
+@layer scenes {
+  /* Not clipped: the bank grows and shrinks as a whole, and a clipped box would show its
+     hard edges; the stage already clips at the screen's edge. */
+  .steam {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .puff {
+    position: absolute;
+    width: 70vmax;
+    height: 52vmax;
+    margin: -26vmax 0 0 -35vmax;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      rgb(239 226 200 / 62%),
+      rgb(239 226 200 / 30%) 55%,
+      transparent
+    );
+  }
+
+  .p1 {
+    top: 20%;
+    left: 18%;
+  }
+
+  .p2 {
+    top: 30%;
+    left: 62%;
+    width: 80vmax;
+  }
+
+  .p3 {
+    top: 72%;
+    left: 30%;
+  }
+
+  .p4 {
+    top: 78%;
+    left: 80%;
+  }
+
+  .p5 {
+    top: 50%;
+    left: 45%;
+    width: 90vmax;
+    height: 60vmax;
+  }
+
+  .p6 {
+    top: 5%;
+    left: 85%;
+  }
+
+  .p7 {
+    top: 95%;
+    left: 5%;
+  }
+}

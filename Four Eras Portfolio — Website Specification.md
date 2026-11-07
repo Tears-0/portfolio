@@ -471,6 +471,7 @@ Playfair Display SC for engraved headings, Old Standard TT for text, Special Eli
 - **Valves:** each skill category is a steam valve or lever on the control panel. Turning one (click or Enter) drives a linked gear train that rotates a drum, revealing that category's tools on engraved brass tags.
 - **Gauges:** each tool's proficiency is a dial gauge whose needle jitters, then settles into a labelled zone (Daily, Comfortable, Familiar). Hovering a gauge vents a small steam tooltip listing the projects that prove it.
 - **Architecture plate:** one engraved schematic of a system you built (for example the quantization benchmark harness or the fusion model), with pipes standing in for data flow.
+- **Engine details:** steam vents on the pipework puff now and then, each on its own slow cycle; a relief valve on the control panel hisses each time a valve opens; a throttle lever beside the gear train leans forward as the visitor scrolls faster and eases back to idle at rest. Added 5 Nov 2026. They stay on the wall and the panel, never over text.
 - **Exit hint (780–800 vh):** rust begins to creep in from the rivets.
 
 ### Hero interaction
@@ -799,6 +800,19 @@ Rust-to-gold transition, constellations, the philosophy parchment, the transmuta
 | Cartridge rack | Act II (II-1, II-2) | CSS blocks with an amber label | 3D-rendered cartridges with plastic texture, printed labels and an insert animation into the deck |
 | Bevelled windows | Act II (II-2 to II-5) | CSS bevels, a checkerboard dither border | Pixel-accurate 1999 window chrome as bitmaps, with true dithering |
 | Console glow and flicker | Act II (II-4, II-5) | CSS text-shadow and an overlay | Phosphor persistence and bloom on the terminal text |
+| CRT power-off | Transition B (B-1, B-2) | CSS desaturate, squash and a glowing line | Rendered picture collapse with phosphor afterglow and a fading dot |
+| Pipes from grid lines | Transition B (B-3), Act III | SVG strokes morphing from straight lines into right-angled pipe | Modelled copper pipework with flanges, valves, rivets and patina |
+| Steam | Transition B (B-3), Act III (III-1) | Radial-gradient puffs | Volumetric steam, or a pre-rendered steam sequence |
+| Gears and flywheel | Transition B, Act III | True involute outlines, flat fills | Machined brass with bevels, wear and specular light |
+| Engine wall | Act III | CSS plate seams and rivet dots | Cast-iron plate texture with bronze rivets and soot |
+| Valve wheels | Act III (III-3) | SVG wheel, CSS ratchet turn | 3D-rendered hand-wheels with a turn animation |
+| Dial gauges | Act III (III-2, III-3) | SVG face, zones and needle | Glass-fronted gauges with engraved faces and reflections |
+| Steam tooltip | Act III | A rounded parchment box | A real puff of steam that carries the text |
+| Architecture plate | Act III (III-4) | Leather panel, ticket boxes, CSS pipe stubs | An engraved brass schematic plate |
+| Rust | Act III (III-4) | Radial gradients at the corners | Rust textures growing from each rivet |
+| Steam vents | Act III | SVG nozzles on the pipes, radial-gradient puffs | Brass vent fittings with real jets of steam |
+| Relief valve | Act III (control panel) | SVG valve, a puff on each valve change | A rendered safety valve with a sharp steam jet |
+| Throttle lever | Act III (control panel) | SVG lever on a notched quadrant | A 3D-rendered lever with a ratcheting quadrant |
 
 ### M6 · Continuity and performance (4–6 days)
 

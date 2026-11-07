@@ -135,4 +135,26 @@ const publications = defineCollection({
   }),
 });
 
-export const collections = { eras, profile, skills, projects, philosophy, education, publications };
+const architecture = defineCollection({
+  loader: file('src/content/architecture.yaml'),
+  schema: z.object({
+    title: z.string(),
+    project: reference('projects'),
+    caption: maxWords(20),
+    stages: z
+      .array(z.strictObject({ label: z.string().max(28), detail: maxWords(18).optional() }))
+      .min(3)
+      .max(6),
+  }),
+});
+
+export const collections = {
+  eras,
+  profile,
+  skills,
+  projects,
+  philosophy,
+  education,
+  publications,
+  architecture,
+};
