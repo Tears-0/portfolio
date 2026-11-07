@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { addBeatFades, sceneTimeline } from '../beats';
-import type { Beat } from '../registry';
+import { SCROLL_PACE, type Beat } from '../registry';
 import { activeStep } from '../steps';
 import type { SceneContext, SceneModule } from '../types';
 import { FLYWHEEL_TRAIN, PANEL_TRAIN, trainRotations, type PlacedGear } from './train';
@@ -19,8 +19,11 @@ const RUST_FROM = 180; // III-4 (780 vh): rust creeps in from the rivets
 const DRIVE_PER_VH = 3;
 const IDLE_PER_S = 9;
 
-/** The throttle reads idle at rest and full at this scroll speed (vh per second) or faster. */
-const FULL_THROTTLE = 140;
+/**
+ * The throttle reads idle at rest and full at this scroll speed (map vh per second) or faster:
+ * about 1.4 screens a second, whatever the scroll pace.
+ */
+export const FULL_THROTTLE = 140 / SCROLL_PACE;
 const THROTTLE_IDLE = -40; // degrees: the lever's two ends on its quadrant
 const THROTTLE_FULL = 40;
 

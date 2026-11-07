@@ -5,10 +5,9 @@ retro-futures, with the resume waiting at the bottom. The full design is in
 [the spec](Four%20Eras%20Portfolio%20—%20Website%20Specification.md); the motion is drawn in the
 [storyboard](https://www.figma.com/design/xIS9BkotXQYD09nHclLayh).
 
-**Status: M4 built, awaiting review.** The static page and the resume are ready to go live;
-the time-machine prologue, Act I (2099), the shatter, Act II (1999) with its console and
-case-study pages, the power loss and Act III (1888) with its valves and gauges are built;
-Act IV is on its way. The art is lo-fi on
+**Status: M5 built, awaiting review.** The static page and the resume are ready to go live;
+every act and transition of the descent is built, from the time-machine prologue to the 1350
+contact portal and its Worker. Next: M6, continuity and performance. The art is lo-fi on
 purpose (vector, CSS, 2D canvas): a later hi-fi pass replaces it with real textures and 3D
 renders where possible (the spec's "Hi-fi art pass" lists every entity).
 
@@ -54,25 +53,31 @@ covers the private resume with your phone number (`npm run pdf:private`).
 | The 1888 valves         | Open a skill category (each is a deep link: `#skill-<id>`); hover or focus a gauge for its proof     |
 | The 1999 console        | Type or press a chip (`help` lists commands); ↑/↓ history, Esc leaves it, Page Up/Down still page    |
 | A window's ✕ or Skip    | On to the next rest point                                                                            |
-| `?at=100`               | Open the descent at any vh, for reviewing a moment                                                   |
+| `?at=100`               | Open the descent at any map vh, for reviewing a moment                                               |
 | <code>`</code>          | Show or hide the scroll markers (remembered)                                                         |
 | `?mode=stacked`         | Force the stacked version (what reduced motion and phones get)                                       |
 
 ## Where things live
 
-- `src/scenes/registry.ts`: **the scroll map.** Scenes, beats, rest points and deep links in vh.
+- `src/scenes/registry.ts`: **the scroll map.** Scenes, beats, rest points and deep links in map
+  vh. `SCROLL_PACE` sets how many screen heights of scrolling each map vh takes (2 for now):
+  raise it to slow the whole descent, lower it to speed it up.
   Tune pacing here; the engine, gauge, keyboard paging and markers all read from it.
 - `src/scenes/<scene>/`: one module per act and transition. Built so far: `act-2099/` (scene,
   styles, the palms and constellation geometry), `t-shatter/` (the shard map and choreography)
-  `act-1999/` (scene, styles, the grid horizon, the console and its commands), `t-power-loss/`
-  and `act-1888/` (scene, styles, the involute gear generator and gear trains, the pipework,
-  steam). The others are grey boxes until their milestone.
+  `act-1999/` (scene, styles, the grid horizon, the console and its commands), `t-power-loss/`,
+  `act-1888/` (scene, styles, the involute gear generator and gear trains, the pipework,
+  steam), `t-rust-to-gold/` (the noise material) and `act-1350/` (scene, styles, the contact
+  portal's controller).
 - `src/engine/`: the master timeline, keyboard and deep links, the gauge, the markers, the time
   machine, its particles and the stacked fallback.
 - `src/content/`: the content records. `content.config.ts` holds their schemas and the spec's
   text limits; the build fails on a missing or over-long field.
 - `src/lib/`: shared readers for the records, the resume builder and the draft rules.
 - `src/pages/`: the static page, the descent, the case studies, the resume and its JSON, the 404.
+- `worker/`: the one Worker, for the contact portal (`/api/contact`): Turnstile, validation, a
+  rate limit and Email Routing. `contact.ts` holds the rules (unit-tested); DEPLOY.md, step 5,
+  sets it up.
 - `src/content/architecture.yaml`: the 1888 architecture plate (a system's stages, in order).
 - `src/data/benchmark.csv`: the quantization results (one row per format, each with its source).
   The 1999 window's chart, the case study and the console's `stats quantization` read it; until

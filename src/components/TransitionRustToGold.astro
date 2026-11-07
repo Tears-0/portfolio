@@ -1,0 +1,44 @@
+---
+// Transition C · Rust to gold (1888 → 1350): the engine wall rusts from its rivets, glows
+// amber, cools into parchment with gold-leaf seams and burns away to the night sky; the
+// flywheel unrolls into astrolabe rings and the first stars ignite. Decorative only: hidden
+// from assistive technology, and stacked mode leaves transitions out.
+import '../scenes/t-rust-to-gold/t-rust-to-gold.css';
+import { gearGeometry } from '../scenes/act-1888/gear';
+import { FLYWHEEL_TRAIN, trainViewBox } from '../scenes/act-1888/train';
+import { starField } from '../scenes/act-2099/signs';
+import type { SceneDef } from '../scenes/registry';
+import Gear from './Gear.astro';
+import SceneLayer from './SceneLayer.astro';
+
+interface Props {
+  scene: SceneDef;
+}
+const { scene } = Astro.props;
+const flywheel = FLYWHEEL_TRAIN[0]!;
+const pitch = gearGeometry({ teeth: flywheel.teeth, module: 9 }).pitch;
+// The astrolabe's rings: the flywheel's rim settles into three of them.
+const RINGS = [0.6, 0.82, 1.04].map((k) => Math.round(pitch * k));
+const stars = starField(44, 1600, 900, 800).map((s) => ({ ...s, x: s.x + 800, y: s.y + 450 }));
+---
+
+<SceneLayer scene={scene}>
+  <canvas class="tc-wall" width="400" height="225" data-tc-wall></canvas>
+  <svg class="tc-stars" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" data-tc-stars>
+    {stars.map((s) => (
+      <circle cx={s.x.toFixed(1)} cy={s.y.toFixed(1)} r={s.r} opacity={s.o.toFixed(2)} />
+    ))}
+  </svg>
+  <svg class="a3-flywheel tc-flywheel" viewBox={trainViewBox(FLYWHEEL_TRAIN, 9)}>
+    <g data-tc-gears>
+      {FLYWHEEL_TRAIN.map((g) => (
+        <Gear id={g.id} teeth={g.teeth} module={9} x={g.x} y={g.y} spokes={g.teeth > 30 ? 6 : 0} />
+      ))}
+    </g>
+    <g transform={`translate(${flywheel.x} ${flywheel.y})`}>
+      {RINGS.map((r) => (
+        <circle class="tc-ring" r={pitch} data-tc-ring={r} />
+      ))}
+    </g>
+  </svg>
+</SceneLayer>

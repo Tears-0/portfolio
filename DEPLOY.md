@@ -16,7 +16,9 @@ accounts, so they are yours to do; each takes a few minutes.
 In the repository: **Settings → Secrets and variables → Actions**.
 
 - Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
-- Variables: `DEPLOY_ENABLED` = `true` (the deploy job stays off until this is set).
+- Variables: `DEPLOY_ENABLED` = `true` (the deploy job stays off until this is set), and
+  `TURNSTILE_SITE_KEY` from step 5 (public: it goes into the page). Without it the build uses
+  Cloudflare's test key, which passes everyone.
 
 ## 3. The domain
 
@@ -38,7 +40,33 @@ In the repository: **Settings → Secrets and variables → Actions**.
 - **Web Analytics**: Analytics & Logs → Web Analytics → add `cccy.im` and turn on automatic
   setup. It is cookie-free, so no consent banner.
 
-## 5. First deploy
+## 5. The contact portal
+
+The 1350 portal posts to a small Worker (`worker/`) at `/api/contact`. It checks Turnstile,
+validates every field, allows five messages a minute per visitor, forwards each message to your
+inbox and stores nothing. Until the two secrets below exist it answers "closed for now".
+
+1. **Turnstile**: dashboard → **Turnstile → Add widget**. Hostnames: `cccy.im` (and
+   `localhost` if you want to test against it). Mode: **Managed**. Copy the **site key** into the
+   GitHub variable `TURNSTILE_SITE_KEY` (step 2) and keep the **secret key** for the next step.
+2. **Where messages go**: the address must be verified in Email Routing (step 4). Then set both
+   secrets from your machine (each command asks for the value; nothing is written to the repo):
+
+   ```bash
+   npx wrangler secret put TURNSTILE_SECRET
+   ```
+
+   ```bash
+   npx wrangler secret put CONTACT_TO
+   ```
+
+3. Messages are sent from `portal@cccy.im` (`CONTACT_FROM` in `wrangler.jsonc`), so Email
+   Routing must be enabled on `cccy.im`. Replying in your mail app answers the visitor directly.
+4. To try it locally, copy `.dev.vars.example` to `.dev.vars` (Cloudflare's published test
+   keys), then `npm run build && npx wrangler dev`. Sending is simulated; each message is saved
+   as an `.eml` file under `.wrangler/tmp/`.
+
+## 6. First deploy
 
 Merge to `main`, or deploy once from your machine:
 

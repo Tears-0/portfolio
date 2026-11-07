@@ -32,6 +32,10 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+        env:
+          # The contact portal's Turnstile site key (public). Unset, the build uses Cloudflare's
+          # test key, which passes everyone (DEPLOY.md, step 5).
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
       - name: Checks on the built site (parity, no drafts, no phone number)
         run: npm run test:build
       - name: Resume PDF

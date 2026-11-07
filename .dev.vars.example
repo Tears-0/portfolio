@@ -1,0 +1,7 @@
+# Local secrets for `npx wrangler dev` (copy to .dev.vars, which git ignores).
+# These are Cloudflare's published Turnstile TEST keys: the widget always passes and the
+# secret always verifies. Never use them in production (DEPLOY.md, step 5).
+# https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+# Any address works locally: wrangler dev only simulates sending.
+CONTACT_TO=inbox@example.com

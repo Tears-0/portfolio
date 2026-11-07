@@ -1,15 +1,29 @@
-// Cloudflare Workers static assets: the built site in dist/, no server code.
+// Cloudflare Workers static assets serve the built site in dist/; one small Worker
+// (worker/index.ts) answers /api/* only, for the 1350 contact portal.
 // Deploys run from GitHub Actions (see DEPLOY.md); `npx wrangler deploy` works locally once
 // you have run `npx wrangler login`.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "cccy-portfolio",
   "compatibility_date": "2026-11-01",
+  "main": "worker/index.ts",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash",
+    // Everything else is a static file; only the API reaches the Worker.
+    "run_worker_first": ["/api/*"],
   },
+  // The portal's sender, on the site's own domain. The destination (CONTACT_TO) and the
+  // Turnstile secret (TURNSTILE_SECRET) are secrets: `npx wrangler secret put <NAME>`.
+  "vars": { "CONTACT_FROM": "portal@cccy.im" },
+  // Sends through Email Routing to a verified address (DEPLOY.md, step 5).
+  "send_email": [{ "name": "SEND_EMAIL" }],
+  // Five messages a minute per visitor address.
+  "ratelimits": [
+    { "name": "CONTACT_LIMIT", "namespace_id": "1350", "simple": { "limit": 5, "period": 60 } },
+  ],
   // A preview URL per pull request (wrangler versions upload --preview-alias pr-N).
   "preview_urls": true,
   // Uncomment once the apex is free (DEPLOY.md, step 3). The Minecraft records stay as they are:

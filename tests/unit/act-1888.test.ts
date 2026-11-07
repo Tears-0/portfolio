@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { activeValve, ease, flywheelTurn, throttleAngle } from '../../src/scenes/act-1888/scene';
+import {
+  FULL_THROTTLE,
+  activeValve,
+  ease,
+  flywheelTurn,
+  throttleAngle,
+} from '../../src/scenes/act-1888/scene';
 import { SCENES } from '../../src/scenes/registry';
 import { pipeProgress } from '../../src/scenes/t-power-loss/scene';
 
@@ -29,10 +35,10 @@ describe('Act III · 1888', () => {
 describe('the throttle lever', () => {
   it('rests at idle when nothing moves and reaches full at a brisk scroll, either way', () => {
     expect(throttleAngle(0)).toBe(-40);
-    expect(throttleAngle(140)).toBe(40);
-    expect(throttleAngle(-140)).toBe(40);
-    expect(throttleAngle(1000)).toBe(40);
-    expect(throttleAngle(70)).toBeCloseTo(0);
+    expect(throttleAngle(FULL_THROTTLE)).toBe(40);
+    expect(throttleAngle(-FULL_THROTTLE)).toBe(40);
+    expect(throttleAngle(FULL_THROTTLE * 5)).toBe(40);
+    expect(throttleAngle(FULL_THROTTLE / 2)).toBeCloseTo(0);
   });
 
   it('moves with weight: part of the way each frame, never past its target', () => {

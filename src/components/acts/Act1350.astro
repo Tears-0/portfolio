@@ -1,7 +1,18 @@
 ---
+// Act IV · 1350 · The Grand Magisterium. Celestial indigo, parchment and gold leaf. The stars
+// ignite and the three era signs from the time machine's loading screen hang in the sky as
+// constellations; a parchment leaf carries the philosophy; the contact portal is a gold
+// transmutation circle whose inner rings hold a real, accessible form.
+import '@fontsource-variable/cinzel';
+import '@fontsource-variable/eb-garamond';
+import '@fontsource/unifrakturmaguntia';
 import type { CollectionEntry } from 'astro:content';
-import type { SceneDef } from '../../scenes/registry';
+import '../../scenes/act-1350/act-1350.css';
+import { RESUME_PDF, splitEmail } from '../../lib/content';
 import { SHOW_DRAFTS, hasPlaceholder, publishText } from '../../lib/placeholder';
+import { SIGNS, starField, type SignKind } from '../../scenes/act-2099/signs';
+import { wavyRing } from '../../scenes/geometry';
+import type { SceneDef } from '../../scenes/registry';
 import Beat from '../Beat.astro';
 import Email from '../Email.astro';
 import SceneLayer from '../SceneLayer.astro';
@@ -14,69 +25,258 @@ interface Props {
 const { scene, philosophy, profile } = Astro.props;
 const body = publishText(philosophy.body);
 const origin = publishText(philosophy.origin);
+const mail = splitEmail(profile.links.email);
+
+// Cloudflare's published always-pass test key unless the build sets the real one (DEPLOY.md).
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+
+// The sky: a deterministic star field in four groups that ignite in turn, and the era signs.
+const stars = starField(150, 1600, 900, 1350).map((s, i) => ({
+  ...s,
+  x: s.x + 800,
+  y: s.y + 450,
+  g: i % 4,
+}));
+const CONSTELLATIONS: { kind: SignKind; name: string; x: number; y: number; k: number }[] = [
+  // Kept well inside the 1600 × 900 box: tall windows crop its sides ("slice").
+  { kind: 'circuit', name: 'The Circuit · 1999', x: 440, y: 160, k: 0.5 },
+  { kind: 'gear', name: 'The Gear · 1888', x: 1180, y: 150, k: 0.45 },
+  { kind: 'astrolabe', name: 'The Astrolabe · 1350', x: 1200, y: 735, k: 0.45 },
+];
+
+// The closing line, inked letter by letter: words keep together, each letter is its own span.
+const [initial = '', ...restChars] = [...philosophy.closingLine];
+const words = restChars.join('').split(' ');
+
+// Invented marks (not real runes or religious symbols), one beside each field.
+const RUNES = {
+  name: 'M12 3 V21 M6 12 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0',
+  email: 'M12 4 L20 19 H4 Z M10.5 13.5 a1.5 1.5 0 1 0 3 0 a1.5 1.5 0 1 0 -3 0',
+  message: 'M6 7 a7.5 7.5 0 1 0 12 0 M6 19 H18',
+} as const;
+const ringMarks = Array.from({ length: 12 }, (_, i) => ({
+  a: i * 30 + 15,
+  d: Object.values(RUNES)[i % 3]!,
+}));
+const ticks = Array.from({ length: 72 }, (_, i) => i * 5);
+const rad = (deg: number) => (deg * Math.PI) / 180;
+const pt = (r: number, deg: number) =>
+  `${Math.round(r * Math.cos(rad(deg)) * 10) / 10} ${Math.round(r * Math.sin(rad(deg)) * 10) / 10}`;
+const square = [45, 135, 225, 315].map((a) => pt(230, a)).join(' L ');
 ---
 
 <SceneLayer scene={scene} anchor="origin" heading="1350 · Origin">
+  <div class="a4-sky" aria-hidden="true">
+    <svg class="a4-stars" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      {[0, 1, 2, 3].map((g) => (
+        <g class="a4-star-group" data-a4-stars={g}>
+          {stars
+            .filter((s) => s.g === g)
+            .map((s) => (
+              <circle cx={s.x.toFixed(1)} cy={s.y.toFixed(1)} r={s.r} opacity={s.o.toFixed(2)} />
+            ))}
+        </g>
+      ))}
+      {CONSTELLATIONS.map((c) => (
+        <g class="a4-constellation" transform={`translate(${c.x} ${c.y})`}>
+          <g data-a4-constellation>
+            <g transform={`scale(${c.k})`}>
+              {SIGNS[c.kind].lines.map((d) => (
+                <path class="a4-line" d={d} pathLength="1" />
+              ))}
+              {SIGNS[c.kind].stars.map(([x, y]) => (
+                <circle class="a4-node" cx={x} cy={y} r="5" />
+              ))}
+            </g>
+            <text class="a4-name" x="0" y={170 * c.k + 24}>
+              {c.name}
+            </text>
+          </g>
+        </g>
+      ))}
+    </svg>
+  </div>
+
   <Beat scene="act-1350" beat="philosophy">
-    <div class="leaf">
-      <blockquote class="closing-line">
-        <p>{philosophy.closingLine}</p>
+    <article class="a4-leaf" aria-labelledby="leaf-title" data-a4-leaf>
+      <h3 class="visually-hidden" id="leaf-title">
+        Why I build
+      </h3>
+      <blockquote class="a4-closing">
+        <p class="visually-hidden">{philosophy.closingLine}</p>
+        <p class="a4-ink" aria-hidden="true" data-a4-ink>
+          <span class="a4-initial c">{initial}</span>
+          {words.map((word, w) => (
+            <>
+              <span class="w">
+                {[...word].map((ch) => (
+                  <span class="c">{ch}</span>
+                ))}
+              </span>
+              {w < words.length - 1 && ' '}
+            </>
+          ))}
+        </p>
       </blockquote>
-      {body && <p class:list={{ draft: hasPlaceholder(body) }}>{body}</p>}
+      {body && <p class:list={['a4-body', { draft: hasPlaceholder(body) }]}>{body}</p>}
       {origin && (
         <>
-          <h3>Origin</h3>
-          <p class:list={{ draft: hasPlaceholder(origin) }}>{origin}</p>
+          <h4 class="a4-origin-title">Origin</h4>
+          <p class:list={['a4-body', { draft: hasPlaceholder(origin) }]}>{origin}</p>
         </>
       )}
-    </div>
+    </article>
   </Beat>
+
   <Beat scene="act-1350" beat="contact" id="contact">
-    <div class="portal">
-      <h3 id="contact-title" tabindex="-1">
+    <section class="a4-portal" aria-labelledby="contact-title" data-portal>
+      <h3 class="a4-portal-title" id="contact-title" tabindex="-1">
         Contact
       </h3>
-      <form class="portal-form" method="post" action="/api/contact">
-        <label>
-          Name <input name="name" autocomplete="name" required />
-        </label>
-        <label>
-          Email <input name="email" type="email" autocomplete="email" required />
-        </label>
-        <label>
-          Message <textarea name="message" rows="4" required></textarea>
-        </label>
-        <button type="submit" disabled>
-          Seal the message
-        </button>
-        <p class="gb-note" aria-hidden="true">
-          The form posts to a Worker with Turnstile in M5; sending is off until then
-        </p>
-      </form>
-      <ul class="outer-ring" aria-label="Other ways to reach me">
+      <div class="a4-circle-wrap">
+        <svg class="a4-circle" viewBox="-310 -310 620 620" aria-hidden="true" data-a4-circle>
+          <g class="a4-spin">
+            <circle class="a4-ring" r="292" pathLength="1"></circle>
+            <circle class="a4-ring" r="276" pathLength="1"></circle>
+            {ticks.map((t) => (
+              <path class="a4-tick" d={`M ${pt(276, t)} L ${pt(t % 30 === 0 ? 262 : 269, t)}`} />
+            ))}
+            {ringMarks.map((m) => (
+              <g transform={`rotate(${m.a}) translate(250 0) rotate(90) translate(-12 -12)`}>
+                <path class="a4-mark" d={m.d} />
+              </g>
+            ))}
+            <circle class="a4-ring" r="232" pathLength="1"></circle>
+            <path class="a4-ring a4-square" d={`M ${square} Z`} pathLength="1"></path>
+            <circle class="a4-ring" r="164" pathLength="1"></circle>
+          </g>
+        </svg>
+
+        <form
+          class="a4-form"
+          method="post"
+          action="/api/contact"
+          novalidate
+          aria-describedby="portal-intro"
+          data-portal-form
+          data-sitekey={siteKey}
+        >
+          <p class="a4-intro" id="portal-intro">
+            Write into the circle. All three are needed.
+          </p>
+          <div class="a4-field">
+            <svg class="a4-rune" viewBox="0 0 24 24" aria-hidden="true">
+              <path d={RUNES.name} />
+            </svg>
+            <label for="portal-name">Name</label>
+            <input
+              id="portal-name"
+              name="name"
+              autocomplete="name"
+              required
+              maxlength="100"
+              aria-describedby="portal-name-error"
+            />
+            <p class="a4-error" id="portal-name-error" hidden></p>
+          </div>
+          <div class="a4-field">
+            <svg class="a4-rune" viewBox="0 0 24 24" aria-hidden="true">
+              <path d={RUNES.email} />
+            </svg>
+            <label for="portal-email">Email</label>
+            <input
+              id="portal-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              maxlength="254"
+              aria-describedby="portal-email-error"
+            />
+            <p class="a4-error" id="portal-email-error" hidden></p>
+          </div>
+          <div class="a4-field">
+            <svg class="a4-rune" viewBox="0 0 24 24" aria-hidden="true">
+              <path d={RUNES.message} />
+            </svg>
+            <label for="portal-message">Message</label>
+            <textarea
+              id="portal-message"
+              name="message"
+              rows="4"
+              required
+              maxlength="5000"
+              aria-describedby="portal-message-error"
+            ></textarea>
+            <p class="a4-error" id="portal-message-error" hidden></p>
+          </div>
+          <div class="a4-honey" aria-hidden="true">
+            <label>
+              Leave this empty <input name="website" tabindex="-1" autocomplete="off" />
+            </label>
+          </div>
+          <div class="a4-turnstile" data-portal-turnstile></div>
+          <button class="a4-submit" type="submit">
+            Seal the message
+          </button>
+          <p class="a4-status" role="status" data-portal-status></p>
+          <noscript>
+            <p class="a4-noscript">
+              The form needs JavaScript to check that you are not a bot.
+              {mail && ` You can also write to ${mail.user} [at] ${mail.domain}.`}
+            </p>
+          </noscript>
+        </form>
+
+        <div class="a4-embers" aria-hidden="true" data-portal-embers></div>
+        <svg class="a4-seal" viewBox="-60 -60 120 120" aria-hidden="true">
+          <path class="a4-seal-wax" d={wavyRing(0, 0, 50, 4, 9)}></path>
+          <circle class="a4-seal-rim" r="36"></circle>
+          <path
+            class="a4-seal-mark"
+            d="M -14 -16 V 16 M -14 -16 H 4 a 9 9 0 0 1 0 18 H -14 M 2 2 L 16 16"
+          ></path>
+        </svg>
+      </div>
+
+      <ul class="a4-outer" aria-label="Other ways to reach me">
         {profile.links.email && (
-          <li>
+          <li class="a4-ring-link nw">
             <Email email={profile.links.email} />
           </li>
         )}
         {profile.links.linkedin ? (
-          <li>
+          <li class="a4-ring-link ne">
             <a href={profile.links.linkedin}>LinkedIn</a>
           </li>
         ) : (
-          SHOW_DRAFTS && <li class="draft">LinkedIn [add]</li>
+          SHOW_DRAFTS && <li class="a4-ring-link ne draft">LinkedIn [add]</li>
         )}
         {profile.links.github ? (
-          <li>
+          <li class="a4-ring-link sw">
             <a href={profile.links.github}>GitHub</a>
           </li>
         ) : (
-          SHOW_DRAFTS && <li class="draft">GitHub [add]</li>
+          SHOW_DRAFTS && <li class="a4-ring-link sw draft">GitHub [add]</li>
         )}
-        <li>
+        <li class="a4-ring-link se">
           <a href="/resume">Unfurl the resume</a>
+          <a class="a4-pdf" href={RESUME_PDF} download>
+            PDF
+          </a>
         </li>
       </ul>
-    </div>
+    </section>
   </Beat>
 </SceneLayer>
+
+<script>
+  // The portal works in both modes; its controller loads once the page is idle.
+  const root = document.querySelector<HTMLElement>('[data-portal]');
+  if (root) {
+    const load = () =>
+      import('../../scenes/act-1350/portal').then(({ mountPortal }) => mountPortal(root));
+    if ('requestIdleCallback' in window) requestIdleCallback(() => void load(), { timeout: 3000 });
+    else setTimeout(() => void load(), 1000);
+  }
+</script>

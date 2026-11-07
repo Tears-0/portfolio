@@ -5,11 +5,11 @@ import Act1350 from '../components/acts/Act1350.astro';
 import Act1888 from '../components/acts/Act1888.astro';
 import Act1999 from '../components/acts/Act1999.astro';
 import Act2099 from '../components/acts/Act2099.astro';
-import SceneLayer from '../components/SceneLayer.astro';
 import ScrollMarkers from '../components/ScrollMarkers.astro';
 import TimelineGauge from '../components/TimelineGauge.astro';
 import TimeMachineLoading from '../components/TimeMachineLoading.astro';
 import TransitionPowerLoss from '../components/TransitionPowerLoss.astro';
+import TransitionRustToGold from '../components/TransitionRustToGold.astro';
 import TransitionShatter from '../components/TransitionShatter.astro';
 import Descent from '../layouts/Descent.astro';
 import {
@@ -24,6 +24,12 @@ import {
 import { SCENES, type SceneDef, type SceneId } from '../scenes/registry';
 
 const scene = (id: SceneId): SceneDef => SCENES.find((s) => s.id === id)!;
+
+// The contact portal's bot check (Cloudflare Turnstile) loads one script and one frame from
+// Cloudflare; this page's policy allows exactly those, on top of its own hashed scripts.
+Astro.csp?.insertScriptResource("'self'");
+Astro.csp?.insertScriptResource('https://challenges.cloudflare.com');
+Astro.csp?.insertDirective('frame-src https://challenges.cloudflare.com');
 
 const [eras, profile, philosophy, projects, allProjects, skills, architecture] = await Promise.all([
   getEras(),
@@ -53,7 +59,7 @@ const [eras, profile, philosophy, projects, allProjects, skills, architecture] =
         projects={allProjects}
         architecture={architecture}
       />
-      <SceneLayer scene={scene('rust-to-gold')} />
+      <TransitionRustToGold scene={scene('rust-to-gold')} />
       <Act1350 scene={scene('act-1350')} philosophy={philosophy} profile={profile} />
     </div>
   </main>

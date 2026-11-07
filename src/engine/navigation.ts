@@ -1,10 +1,13 @@
-import { ANCHORS, REST_POINTS } from '../scenes/registry';
+import { ANCHORS, REST_POINTS, SCROLL_PACE } from '../scenes/registry';
 
 /** Rest points closer than this (vh) count as "here", so paging always moves on. */
 const HERE = 0.5;
 
-export const vhToY = (vh: number, viewportHeight: number): number => (vh / 100) * viewportHeight;
-export const yToVh = (y: number, viewportHeight: number): number => (y / viewportHeight) * 100;
+/** Map vh ↔ pixels of scroll: each map vh is SCROLL_PACE viewport heights long. */
+export const vhToY = (vh: number, viewportHeight: number, pace = SCROLL_PACE): number =>
+  (vh / 100) * viewportHeight * pace;
+export const yToVh = (y: number, viewportHeight: number, pace = SCROLL_PACE): number =>
+  (y / viewportHeight / pace) * 100;
 
 /** Page Down / Space: the next rest point, or undefined past the last one. */
 export function nextRest(vh: number): number | undefined {

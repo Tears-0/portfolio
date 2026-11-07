@@ -8,6 +8,7 @@ import {
   vhToY,
   yToVh,
 } from '../../src/engine/navigation';
+import { SCROLL_PACE, TOTAL_VH } from '../../src/scenes/registry';
 
 describe('keyboard paging', () => {
   it('steps forward through rest points', () => {
@@ -45,9 +46,17 @@ describe('deep links', () => {
 });
 
 describe('scroll conversions and travel', () => {
-  it('converts between vh and pixels', () => {
-    expect(vhToY(250, 1000)).toBe(2500);
-    expect(yToVh(2500, 1000)).toBe(250);
+  it('converts between map vh and pixels at the scroll pace', () => {
+    expect(vhToY(250, 1000, 1)).toBe(2500);
+    expect(yToVh(2500, 1000, 1)).toBe(250);
+    expect(vhToY(250, 1000, 2)).toBe(5000);
+    expect(yToVh(5000, 1000, 2)).toBe(250);
+  });
+
+  it('scrolls the descent at half the first cut’s speed', () => {
+    expect(SCROLL_PACE).toBe(2);
+    expect(vhToY(TOTAL_VH, 1000)).toBe(TOTAL_VH * 20);
+    expect(yToVh(vhToY(455, 768), 768)).toBeCloseTo(455);
   });
 
   it('travels quickly between neighbours and caps long jumps', () => {

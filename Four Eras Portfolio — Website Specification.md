@@ -82,7 +82,7 @@ Full mobile version, blog, multilingual pages, music (parked).
 
 ## The descent: page structure and scroll map
 
-**The home page is one pinned, scrubbed scroll of about 1,100 viewport-heights (vh): four acts of 150–250 vh each, joined by three transitions of about 100 vh.** Scrolling back up plays everything in reverse, so the descent can be rewound.
+**The home page is one pinned, scrubbed scroll mapped in about 1,100 "map vh": four acts of 150–250 vh each, joined by three transitions of about 100 vh.** Scrolling back up plays everything in reverse, so the descent can be rewound. The page scrolls two viewport heights for every map vh (`SCROLL_PACE = 2` in the scroll map, set on 7 Nov 2026 because details went by too fast at one), so the full descent is about 2,200 viewport heights of scrolling. The pace is one number; every range below stays in map vh.
 
 ### Scroll map (first draft, to be tuned in the prototype)
 
@@ -813,6 +813,12 @@ Rust-to-gold transition, constellations, the philosophy parchment, the transmuta
 | Steam vents | Act III | SVG nozzles on the pipes, radial-gradient puffs | Brass vent fittings with real jets of steam |
 | Relief valve | Act III (control panel) | SVG valve, a puff on each valve change | A rendered safety valve with a sharp steam jet |
 | Throttle lever | Act III (control panel) | SVG lever on a notched quadrant | A 3D-rendered lever with a ratcheting quadrant |
+| Rust, heat, parchment and burn | Transition C | A 400 × 225 canvas of value noise, scaled up softly | A shader dissolve at full resolution with real rust, heat-glow and paper textures |
+| Gears to astrolabe rings | Transition C | Gear fades while SVG rings settle | A true morph of the wheel's rim into engraved astrolabe rings |
+| Night sky and constellations | Act IV | SVG star dots and gold line paths (the three era signs) | A painted star field with depth, glow and twinkle |
+| Parchment leaf | Act IV (IV-2) | CSS gradients and a double gold border, clip-path unroll | Real vellum texture, illuminated gold-leaf border, a 3D unrolling scroll |
+| Transmutation circle | Act IV (IV-3) | SVG rings, ticks and invented marks, stroke drawing | Gold-leaf engraving with a light sweep and depth |
+| Embers and wax seal | Act IV (IV-4) | CSS dots and an SVG seal | Particle embers with heat shimmer; a rendered wax seal pressing in |
 
 ### M6 · Continuity and performance (4–6 days)
 

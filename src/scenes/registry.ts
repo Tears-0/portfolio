@@ -5,7 +5,8 @@ import type { SceneModule } from './types';
  * storyboard (frame codes in `frames`). Tune pacing here; the engine, the gauge, keyboard
  * paging, deep links and the scroll markers all read from it.
  *
- * 1 vh of the map = one viewport height of scrolling.
+ * Positions are in map vh. The page scrolls SCROLL_PACE viewport heights for each map vh, so
+ * the pace of the whole descent is one number and the map itself never changes with it.
  */
 export type SceneId =
   'act-2099' | 'shatter' | 'act-1999' | 'power-loss' | 'act-1888' | 'rust-to-gold' | 'act-1350';
@@ -270,6 +271,12 @@ export const SCENES: readonly SceneDef[] = [
 ];
 
 export const TOTAL_VH = SCENES[SCENES.length - 1]!.to;
+
+/**
+ * Viewport heights of scrolling per map vh. 2 halves the scroll speed of the first cut (set on
+ * 7 Nov 2026: details in the 1999 act went by too fast). Raise it to slow the descent further.
+ */
+export const SCROLL_PACE = 2;
 
 export interface RestPoint {
   vh: number;
